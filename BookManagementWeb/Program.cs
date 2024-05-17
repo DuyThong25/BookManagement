@@ -1,4 +1,4 @@
-using BookManagementWeb.Data;
+using BookManager.DataAccess.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 

@@ -1,5 +1,5 @@
-﻿using BookManagementWeb.Data;
-using BookManagementWeb.Models;
+﻿using BookManager.DataAccess.Data;
+using BookManager.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookManagementWeb.Controllers
