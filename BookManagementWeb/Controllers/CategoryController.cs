@@ -1,4 +1,5 @@
 ﻿using BookManager.DataAccess.Data;
+using BookManager.DataAccess.Repository.IRepository;
 using BookManager.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,15 +7,14 @@ namespace BookManagementWeb.Controllers
 {
     public class CategoryController : Controller
     {
-        private readonly ApplicationDbContext _db;
-        public CategoryController(ApplicationDbContext db)
+        private readonly IUnitOfWork _unitOfWork;
+        public CategoryController(IUnitOfWork unitOfWork)
         {
-            this._db = db;
+            this._unitOfWork = unitOfWork;
         }
         public IActionResult Index()
         {
-
-            return View(_db.Categories.OrderBy(x => x.DisplayOrder).ToList());
+            return View(_unitOfWork.Category.GetAll());
         }
 
         public IActionResult Create()
@@ -30,8 +30,8 @@ namespace BookManagementWeb.Controllers
             }
             if(ModelState.IsValid)
             {
-                _db.Categories.Add(category);
-                _db.SaveChanges();
+                _unitOfWork.Category.Add(category);
+                _unitOfWork.Save();
                 TempData["success"] = "Category add successfully";
                 return RedirectToAction("Index");
             }
@@ -40,7 +40,7 @@ namespace BookManagementWeb.Controllers
 
         public IActionResult Edit(int id)
         {
-            Category? category = _db.Categories.Find(id);
+            Category? category = _unitOfWork.Category.Get(x => x.CategoryId == id);
             if(category == null)
             {
                 return NotFound();
@@ -57,8 +57,8 @@ namespace BookManagementWeb.Controllers
             }
             if (ModelState.IsValid)
             {
-                _db.Categories.Update(category);
-                _db.SaveChanges();
+                _unitOfWork.Category.Update(category);
+                _unitOfWork.Save();
                 TempData["success"] = "Category edit successfully";
                 return RedirectToAction("Index");
             }
@@ -67,7 +67,7 @@ namespace BookManagementWeb.Controllers
 
         public IActionResult Delete(int id)
         {
-            Category? category = _db.Categories.Find(id);
+            Category? category = _unitOfWork.Category.Get(x => x.CategoryId == id);
             if (category == null)
             {
                 return NotFound();
@@ -78,11 +78,11 @@ namespace BookManagementWeb.Controllers
         [HttpPost, ActionName("Delete")]
         public IActionResult DeleteConfirm(int id)
         {
-            Category? category = _db.Categories.Find(id);
-            if(category != null)
+            Category? category = _unitOfWork.Category.Get(x => x.CategoryId == id);
+            if (category != null)
             {
-                _db.Categories.Remove(category);
-                _db.SaveChanges();
+                _unitOfWork.Category.Remove(category);
+                _unitOfWork.Save();
                 TempData["success"] = "Category delete successfully";
                 return RedirectToAction("Index");
 
