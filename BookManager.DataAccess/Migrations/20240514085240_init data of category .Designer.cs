@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BookManager.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240514085240_init data of category ")]
+    [Migration("20240514085240_init data of Product ")]
     partial class initdataofcategory
     {
         /// <inheritdoc />
@@ -24,7 +24,7 @@ namespace BookManager.DataAccess.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("BookManagementWeb.Models.Category", b =>
+            modelBuilder.Entity("BookManagementWeb.Models.Product", b =>
                 {
                     b.Property<int>("CategoryId")
                         .ValueGeneratedOnAdd()

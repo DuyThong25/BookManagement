@@ -1,29 +1,32 @@
 ﻿@model Category;
 @{
-    ViewData["Title"] = "Delete category";
+    ViewData["Title"] = "Edit Category";
 }
 <div class="card shadow border-1 mt-4">
     <div class="card-header bg-secondary bg-gradient ml-0 py-3">
         <div class="row">
             <div class="col-12 text-center text-white">
-                <h2>Delete Category</h2>
+                <h2>Edit Category</h2>
             </div>
         </div>
     </div>
     <div class="card-body p-4">
         <form method="post" class="row">
             <input asp-for="CategoryId" hidden />
+            @* <div asp-validation-summary="All"></div> *@
             <div class="form-floating py-2 col-12">
-                <input asp-for="Name" class="form-control border-0 shadow" disabled/>
+                <input asp-for="Name" class="form-control border-0 shadow " />
                 <label asp-for="Name" class="ms-2"></label>
+                <span asp-validation-for="Name" class="text-danger"></span>
             </div>
             <div class="form-floating py-2 col-12">
-                <input asp-for="DisplayOrder" class="form-control border-0 shadow" disabled />
+                <input asp-for="DisplayOrder" class="form-control border-0 shadow" />
                 <label asp-for="DisplayOrder" class="ms-2"></label>
+                <span asp-validation-for="DisplayOrder" class="text-danger"></span>
             </div>
             <div class="row mt-3">
                 <div class="col-6 col-lg-3">
-                    <button type="submit" class="form-control btn btn-outline-danger">Delete</button>
+                    <button type="submit" class="form-control btn btn-primary">Update</button>
                 </div>
                 <div class="col-6 col-lg-3">
                     <a asp-controller="Category" asp-action="Index" class="form-control btn btn-outline-primary">Back to list</a>
@@ -32,3 +35,10 @@
         </form>
     </div>
 </div>
+
+
+@section Scripts {
+    @{
+        <partial name="_ValidationScriptsPartial"></partial>
+    }
+} 

@@ -3,14 +3,15 @@ using BookManager.DataAccess.Repository.IRepository;
 using BookManager.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace BookManagementWeb.Controllers
+namespace BookManagementWeb.Areas.Admin.Controllers
 {
+    [Area("Admin")]
     public class CategoryController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
         public CategoryController(IUnitOfWork unitOfWork)
         {
-            this._unitOfWork = unitOfWork;
+            _unitOfWork = unitOfWork;
         }
         public IActionResult Index()
         {
@@ -23,12 +24,12 @@ namespace BookManagementWeb.Controllers
         }
         [HttpPost]
         public IActionResult Create(Category category)
-        {   
-            if(category.Name == category.DisplayOrder.ToString())
+        {
+            if (category.Name == category.DisplayOrder.ToString())
             {
                 ModelState.AddModelError("name", "Category Name không được trùng với Display Order");
             }
-            if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
                 _unitOfWork.Category.Add(category);
                 _unitOfWork.Save();
@@ -40,24 +41,24 @@ namespace BookManagementWeb.Controllers
 
         public IActionResult Edit(int id)
         {
-            Category? category = _unitOfWork.Category.Get(x => x.CategoryId == id);
-            if(category == null)
+            Category? Category = _unitOfWork.Category.Get(x => x.CategoryId == id);
+            if (Category == null)
             {
                 return NotFound();
             }
 
-            return View(category);
+            return View(Category);
         }
         [HttpPost]
-        public IActionResult Edit(Category category)
+        public IActionResult Edit(Category Category)
         {
-            if (category.Name == category.DisplayOrder.ToString())
+            if (Category.Name == Category.DisplayOrder.ToString())
             {
-                ModelState.AddModelError("name", "Category Name không được trùng với Display Order");
+                ModelState.AddModelError("name", "Category Name can not match Display Order");
             }
             if (ModelState.IsValid)
             {
-                _unitOfWork.Category.Update(category);
+                _unitOfWork.Category.Update(Category);
                 _unitOfWork.Save();
                 TempData["success"] = "Category edit successfully";
                 return RedirectToAction("Index");
@@ -67,26 +68,27 @@ namespace BookManagementWeb.Controllers
 
         public IActionResult Delete(int id)
         {
-            Category? category = _unitOfWork.Category.Get(x => x.CategoryId == id);
-            if (category == null)
+            Category? Category = _unitOfWork.Category.Get(x => x.CategoryId == id);
+            if (Category == null)
             {
                 return NotFound();
             }
 
-            return View(category);
+            return View(Category);
         }
         [HttpPost, ActionName("Delete")]
         public IActionResult DeleteConfirm(int id)
         {
-            Category? category = _unitOfWork.Category.Get(x => x.CategoryId == id);
-            if (category != null)
+            Category? Category = _unitOfWork.Category.Get(x => x.CategoryId == id);
+            if (Category != null)
             {
-                _unitOfWork.Category.Remove(category);
+                _unitOfWork.Category.Remove(Category);
                 _unitOfWork.Save();
                 TempData["success"] = "Category delete successfully";
                 return RedirectToAction("Index");
 
-            }else
+            }
+            else
             {
                 return NotFound();
             }

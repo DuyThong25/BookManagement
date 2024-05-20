@@ -11,7 +11,7 @@ namespace BookManager.Models
         public int CategoryId { get; set; }
         [Required(ErrorMessage = "Vui lòng không được để trống")]
         [MaxLength(30, ErrorMessage = "Không được quá 30 ký tự")]
-        [DisplayName("Category Name")]
+        [DisplayName("Product Name")]
         public string Name { get; set; }
         [DisplayName("Display Order")]
         [Range(1, 100, ErrorMessage = "Giá trị phù hợp từ 0 đến 100")]

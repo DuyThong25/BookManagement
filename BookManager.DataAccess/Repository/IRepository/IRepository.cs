@@ -9,7 +9,7 @@ namespace BookManager.DataAccess.Repository.IRepository
 {
     public interface IRepository<T> where T : class // Kiểu Genegic phải là class
     {
-        // VD: T - Category
+        // VD: T - Product
         IEnumerable<T> GetAll();
         T Get(Expression<Func<T, bool>> fillter);  // VD: listCate.where(x => x.id > 5 );
         void Add(T entity);

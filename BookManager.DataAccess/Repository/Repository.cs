@@ -17,7 +17,7 @@ namespace BookManager.DataAccess.Repository
         public Repository(ApplicationDbContext db)
         {
             _db = db;
-            this.dbSet = _db.Set<T>(); // => _db.Category = dbSet
+            this.dbSet = _db.Set<T>(); // => _db.Product = dbSet
         }
         public void Add(T entity)
         {
