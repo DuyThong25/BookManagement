@@ -1,8 +1,10 @@
 ﻿using BookManager.DataAccess.Repository.IRepository;
 using BookManager.Models;
 using BookManager.Models.ViewModel;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.FileProviders;
 using System.Collections.Generic;
 
 namespace BookManagementWeb.Areas.Admin.Controllers
@@ -20,9 +22,9 @@ namespace BookManagementWeb.Areas.Admin.Controllers
             return View(_unitOfWork.Product.GetAll());
         }
 
-        public IActionResult Create()
+        public IActionResult CreateOrUpdate(int? id)
         {
-            IEnumerable<SelectListItem> selectListItems = 
+            IEnumerable<SelectListItem> selectListItems =
                 _unitOfWork.Category.GetAll().Select(x => new SelectListItem
                 {
                     Text = x.Name,
@@ -30,24 +32,38 @@ namespace BookManagementWeb.Areas.Admin.Controllers
                 });
             /*ViewBag.SelectListItems = selectListItems;*/
             /*TempData["SelectListItems"] = selectListItems;*/ /*phai ep kieu khi su dung*/
+
             ProductVM productVM = new ProductVM
             {
                 Product = new Product(),
                 CategoryList = selectListItems
             };
-
+            if (id != null && id != 0) // update
+            {
+                productVM.Product = _unitOfWork.Product.Get(x => x.ProductId == id);
+            }
             return View(productVM);
+
         }
         [HttpPost]
-        public IActionResult Create(ProductVM productVM)
-        {       
+        public IActionResult CreateOrUpdate(ProductVM productVM, IFormFile? file)
+        {
             if (ModelState.IsValid)
             {   
-                _unitOfWork.Product.Add(productVM.Product);
-                _unitOfWork.Save();
-                TempData["success"] = "Product add successfully";
+                if(productVM.Product.ProductId == 0) // Create
+                {
+                    _unitOfWork.Product.Add(productVM.Product);
+                    _unitOfWork.Save();
+                    TempData["success"] = "Product add successfully";
+                }else // update
+                {
+                    _unitOfWork.Product.Update(productVM.Product);
+                    _unitOfWork.Save();
+                    TempData["success"] = "Product edit successfully";
+                }
                 return RedirectToAction("Index");
-            }else
+            }
+            else
             {
                 IEnumerable<SelectListItem> selectListItems =
                 _unitOfWork.Category.GetAll().Select(x => new SelectListItem
@@ -56,35 +72,9 @@ namespace BookManagementWeb.Areas.Admin.Controllers
                     Value = x.CategoryId.ToString()
                 });
                 productVM.CategoryList = selectListItems;
+                TempData["error"] = "Something went wrong..";
                 return View(productVM);
             }
-        }
-
-        public IActionResult Edit(int id)
-        {
-            Product? product = _unitOfWork.Product.Get(x => x.ProductId == id);
-            if (product == null)
-            {
-                return NotFound();
-            }
-
-            return View(product);
-        }
-        [HttpPost]
-        public IActionResult Edit(Product product)
-        {
-            /*if (product.Name == product.DisplayOrder.ToString())
-            {
-                ModelState.AddModelError("name", "Product Name không được trùng với Display Order");
-            }*/
-            if (ModelState.IsValid)
-            {
-                _unitOfWork.Product.Update(product);
-                _unitOfWork.Save();
-                TempData["success"] = "Product edit successfully";
-                return RedirectToAction("Index");
-            }
-            return View();
         }
 
         public IActionResult Delete(int id)

@@ -14,7 +14,7 @@
         <div class="container mb-3">
             <div class="row">
                 <div class="col-12 text-start p-0">
-                    <a asp-controller="Product" asp-action="Create" class="btn btn-primary">
+                    <a asp-controller="Product" asp-action="CreateOrUpdate" class="btn btn-primary">
                         <i class="bi bi-plus-circle"></i> Create new Book
                     </a>
                 </div>
@@ -45,7 +45,7 @@
                         <td>@item.CategoryId</td>
                         <td class="text-center">
                             <div class="w-100 btn-group" role="group">
-                                <a asp-controller="Product" asp-action="Edit" asp-route-id="@item.ProductId" class="btn btn-primary mx-2">
+                                <a asp-controller="Product" asp-action="CreateOrUpdate" asp-route-id="@item.ProductId" class="btn btn-primary mx-2">
                                     <i class="bi bi-pencil-square"> Edit</i>
                                 </a>
                                 <a asp-controller="Product" asp-action="Delete" asp-route-id="@item.ProductId" class="btn btn-outline-danger mx-2">
