@@ -21,7 +21,7 @@ namespace BookManagementWeb.Areas.Admin.Controllers
         }
         public IActionResult Index()
         {
-            return View(_unitOfWork.Product.GetAll());
+            return View(_unitOfWork.Product.GetAll(includeProperties: "Category"));
         }
 
         public IActionResult CreateOrUpdate(int? id)
@@ -42,7 +42,7 @@ namespace BookManagementWeb.Areas.Admin.Controllers
             };
             if (id != null && id != 0) // update
             {
-                productVM.Product = _unitOfWork.Product.Get(x => x.ProductId == id);
+                productVM.Product = _unitOfWork.Product.Get(x => x.ProductId == id, includeProperties: "Category");
             }
             return View(productVM);
 
@@ -84,53 +84,79 @@ namespace BookManagementWeb.Areas.Admin.Controllers
                 return View(productVM);
             }
         }
-
+        public void HandleDeleteFileImage(Product product,string wwwRootPath)
+        {
+            if (!String.IsNullOrEmpty(product.ImageUrl)) // update -> delete file cu
+            {
+                string fileDelete = Path.Combine(wwwRootPath, product.ImageUrl.TrimStart('\\'));
+                if (System.IO.File.Exists(fileDelete))
+                {
+                    System.IO.File.Delete(fileDelete);
+                }
+            }
+        }
         public string HandleToGetFileImage(ProductVM productVM, IFormFile file)
         {
             string wwwRootPath = _webHostEnvironment.WebRootPath;
             string productPath = Path.Combine(wwwRootPath, @"images\product");
             string fileName = Guid.NewGuid().ToString() + Path.GetFileName(file.FileName);
 
-            if (!String.IsNullOrEmpty(productVM.Product.ImageUrl)) // update -> delete file cu
-            {
-                string fileDelete = Path.Combine(wwwRootPath, productVM.Product.ImageUrl.TrimStart('\\'));
-                if (System.IO.File.Exists(fileDelete))
-                {
-                    System.IO.File.Delete(fileDelete);
-                }
-            }
+            HandleDeleteFileImage(productVM.Product, wwwRootPath);
             using (var fileStream = new FileStream(Path.Combine(productPath, fileName), FileMode.Create))
             {
                 file.CopyTo(fileStream);
             }
             return @"\images\product\" + fileName;
         }
+        /*        public IActionResult Delete(int id)
+                {
+                    Product? product = _unitOfWork.Product.Get(x => x.ProductId == id);
+                    if (product == null)
+                    {
+                        return NotFound();
+                    }
+
+                    return View(product);
+                }*/
+        /* [HttpPost, ActionName("Delete")]
+         public IActionResult DeleteConfirm(int id)
+         {
+             Product? product = _unitOfWork.Product.Get(x => x.ProductId == id);
+             if (product != null)
+             {
+                 _unitOfWork.Product.Remove(product);
+                 _unitOfWork.Save();
+                 TempData["success"] = "Product delete successfully";
+                 return RedirectToAction("Index");
+
+             }
+             else
+             {
+                 return NotFound();
+             }
+         }*/
+
+        #region Api Method
+        [HttpDelete]
         public IActionResult Delete(int id)
         {
             Product? product = _unitOfWork.Product.Get(x => x.ProductId == id);
-            if (product == null)
-            {
-                return NotFound();
-            }
+            string wwwRootPath = _webHostEnvironment.WebRootPath;
 
-            return View(product);
-        }
-        [HttpPost, ActionName("Delete")]
-        public IActionResult DeleteConfirm(int id)
-        {
-            Product? product = _unitOfWork.Product.Get(x => x.ProductId == id);
             if (product != null)
             {
                 _unitOfWork.Product.Remove(product);
                 _unitOfWork.Save();
-                TempData["success"] = "Product delete successfully";
-                return RedirectToAction("Index");
-
+                HandleDeleteFileImage(product, wwwRootPath);
+                return Json(new { success = true, messag = "Delete Succesful" });
             }
             else
             {
-                return NotFound();
+                return Json(new { success = false, message = "Delete Fail" });
             }
         }
+
+        #endregion
+
     }
 }

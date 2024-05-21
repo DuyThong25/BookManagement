@@ -7,6 +7,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace BookManager.DataAccess.Repository
 {
@@ -24,16 +25,30 @@ namespace BookManager.DataAccess.Repository
             dbSet.Add(entity);
         }
 
-        public T Get(Expression<Func<T, bool>> fillter)
-        {
-            IQueryable<T> queryable = dbSet;
-            queryable = queryable.Where(fillter);
-            return queryable.FirstOrDefault();
-        }
-
-        public IEnumerable<T> GetAll()
+        public T Get(Expression<Func<T, bool>> fillter, string? includeProperties = null)
         {
             IQueryable<T> query = dbSet;
+            query = query.Where(fillter);
+            if (!String.IsNullOrEmpty(includeProperties))
+            {
+                foreach (var includePro in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query = query.Include(includePro);
+                }
+            }
+            return query.FirstOrDefault();
+        }
+
+        public IEnumerable<T> GetAll(string? includeProperties = null)
+        {
+            IQueryable<T> query = dbSet;
+            if (!String.IsNullOrEmpty(includeProperties))
+            {
+                foreach (var includePro in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query = query.Include(includePro);
+                }
+            }
             return query.ToList();
         }
 
