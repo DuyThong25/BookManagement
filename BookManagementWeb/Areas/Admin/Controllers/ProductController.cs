@@ -13,9 +13,11 @@ namespace BookManagementWeb.Areas.Admin.Controllers
     public class ProductController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
-        public ProductController(IUnitOfWork unitOfWork)
+        private readonly IWebHostEnvironment _webHostEnvironment ;
+        public ProductController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment)
         {
             _unitOfWork = unitOfWork;
+            _webHostEnvironment = webHostEnvironment;
         }
         public IActionResult Index()
         {
@@ -50,6 +52,12 @@ namespace BookManagementWeb.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {   
+                // Handle imgae
+                if(file != null)
+                {
+                    productVM.Product.ImageUrl = HandleToGetFileImage(productVM, file);
+                }
+
                 if(productVM.Product.ProductId == 0) // Create
                 {
                     _unitOfWork.Product.Add(productVM.Product);
@@ -77,6 +85,26 @@ namespace BookManagementWeb.Areas.Admin.Controllers
             }
         }
 
+        public string HandleToGetFileImage(ProductVM productVM, IFormFile file)
+        {
+            string wwwRootPath = _webHostEnvironment.WebRootPath;
+            string productPath = Path.Combine(wwwRootPath, @"images\product");
+            string fileName = Guid.NewGuid().ToString() + Path.GetFileName(file.FileName);
+
+            if (!String.IsNullOrEmpty(productVM.Product.ImageUrl)) // update -> delete file cu
+            {
+                string fileDelete = Path.Combine(wwwRootPath, productVM.Product.ImageUrl.TrimStart('\\'));
+                if (System.IO.File.Exists(fileDelete))
+                {
+                    System.IO.File.Delete(fileDelete);
+                }
+            }
+            using (var fileStream = new FileStream(Path.Combine(productPath, fileName), FileMode.Create))
+            {
+                file.CopyTo(fileStream);
+            }
+            return @"\images\product\" + fileName;
+        }
         public IActionResult Delete(int id)
         {
             Product? product = _unitOfWork.Product.Get(x => x.ProductId == id);
