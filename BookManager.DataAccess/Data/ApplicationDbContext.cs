@@ -1,9 +1,10 @@
 ﻿using BookManager.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-
 namespace BookManager.DataAccess.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext<IdentityUser>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
@@ -17,6 +18,8 @@ namespace BookManager.DataAccess.Data
         // Sử dụng migration để truyền dữ liệu xuống cho database
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             modelBuilder.Entity<Category>().HasData(
                     new Category { CategoryId = 1, Name = "Action", DisplayOrder = 1 },
                     new Category { CategoryId = 2, Name = "Fiction", DisplayOrder = 2 },
