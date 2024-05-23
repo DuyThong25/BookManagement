@@ -1,8 +1,111 @@
-﻿@{
+﻿@using BookManager.Utility
+@model IEnumerable<Product>
+@{
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div style="height:90vh;" class="bg-primary">
+    <div style="height:100%;" class="row">
+        <div class="col-md-7 d-flex flex-column justify-content-center px-5  ">
+            <div class="w-75">
+                <h1 style="font-size:8vh;" class="text-white  text-uppercase">
+                    Buy books at the best prices
+                </h1>
+            </div>
+            <div class="input-group mt-3 bg-white w-75 py-2 rounded-4">
+                <input type="text" class="form-control border-0 rounded-4 " placeholder="Anything you want..">
+                <button class="btn "><i class="bi bi-search-heart"></i></button>
+            </div>
+        </div>
+        <div class="col-md-5 d-none d-md-block text-center ">
+            <div id="carouselExampleCaptions" class="carousel slide h-100 d-flex flex-column justify-content-center" data-bs-ride="carousel">
+                <div class="carousel-indicators">
+                    <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                    <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                    <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2" aria-label="Slide 3"></button>
+                </div>
+                <div class="carousel-inner  ">
+                    <div class="carousel-item active">
+                        <img src="~/images//product/7819c4b2-a47b-4a7e-bb1d-228026d4af36leaves and wonder back.jpg" class=" img-fluid rounded-5 w-75" alt="...">
+                    </div>
+                    <div class="carousel-item">
+                        <img src="~/images//product/7819c4b2-a47b-4a7e-bb1d-228026d4af36leaves and wonder back.jpg" class="img-fluid rounded-5 w-75" alt="...">
+                    </div>
+                    <div class="carousel-item">
+                        <img src="s~/images//product/7819c4b2-a47b-4a7e-bb1d-228026d4af36leaves and wonder back.jpg" class="img-fluid rounded-5 w-75" alt="...">
+                    </div>
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
 </div>
+<div class="container mt-5">
+    <div class="row">
+        <div class="text-center text-black">
+            <h1>
+                Best Seller Book
+            </h1>
+        </div>
+        @foreach (Product obj in Model)
+        {
+            <div class="col-md-3 d-flex justify-content-evenly my-5">
+                <div class="card border-0 border-5 border-top shadow rounded-2 text-center p-2" style="width:260px">
+                    <div class="h-100">
+                        @if (String.IsNullOrEmpty(obj.ImageUrl))
+                        {
+                            <img class="card-img-top rounded" src="~/images//product/no_image.jpg" alt="Card Book">
+                        }
+                        else
+                        {
+                            <img class="card-img-top rounded" src="@obj.ImageUrl" alt="Card Book">
+                        }
+                    </div>
+                    <div class="card-body">
+                        <div style="height:70px;" class="d-flex flex-column justify-content-center mh-100">
+                            <p class="card-title  h4 text-black text-uppercase text-opacity-75">
+                                @obj.Title 
+                            </p>
+                        </div>
+                        <div>
+                            <p class="card-title text-warning">by <b>@obj.Author</b></p>
+                        </div>
+                        <div>
+                            <p class="text-black text-opacity-50 m-0">List price: <span class="text-decoration-line-through ">@obj.ListPrice.ToString(StaticDetail.VndCurrency())</span></p>
+                            <p>As low as <b>@obj.Price100.ToString(StaticDetail.VndCurrency())</b></p>
+                        </div>
+                        <div>
+                            <a asp-area="Customer" asp-controller="Home" asp-action="Detail" asp-route-id="@obj.ProductId" class="btn btn-primary bg-gradient border-0 form-control">Detail</a>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        }
+    </div>
+</div>
+
+<script>
+    function truncateText() {
+        let titleCardElement = document.querySelectorAll(".card-title");
+        Array.from(titleCardElement).forEach((item) => {
+            let textHeight = item.clientHeight;
+            let maxDiv = item.closest("div").clientHeight;
+            if (textHeight > maxDiv) {
+                let maxText = item.innerText.slice(0, 30);
+                let newText = maxText.slice(0, -3) + '...';
+                item.innerHTML = newText
+            }
+        })
+    }
+    truncateText();
+</script>

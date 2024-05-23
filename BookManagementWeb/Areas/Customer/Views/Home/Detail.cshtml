@@ -1,0 +1,85 @@
+﻿@using BookManager.Utility
+@model Product
+
+
+<form method="post">
+    <div class="container mt-4 ">
+        <a asp-action="Index" class="mb-4 ms-4 btn btn-outline-primary bg-gradient fw-semibold btn-sm text-uppercase">
+            <small>Back to home</small>
+        </a>
+        <div class="row p-4 shadow border border-1 border-black border-opacity-10 rounded rounded-1">
+            <div class="col-md-6 col-lg-5 d-none d-md-block">
+                <div class="pe-4">
+                    @* <img src="https://placehold.co/500x600" width="100" class="rounded" /> *@
+                    <img class="w-100 h-100 img-fluid rounded rounded-top-2 rounded-bottom-5 " src="@Model.ImageUrl" />
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-7">
+                <h1 class="text-black text-uppercase fw-bold">@Model.Title</h1>
+                <p class="text-black-50">by <b>@Model.Author</b></p>
+                <p class="badge m-0">@Model.Category.Name</p>
+                <div style="height:200px; max-height:200px;" class="overflow-auto mb-3">
+                    <p class="text-secondary ">@Html.Raw(@Model.Description)</p>
+                </div>
+                <div>
+                    <h6 class="text-dark text-opacity-50 ">ISBN : @Model.ISBN</h6>
+                    <h6 class="text-dark text-opacity-50 pb-2">
+                        List Price:
+                        <span class="text-decoration-line-through">
+                            @Model.ListPrice.ToString(StaticDetail.VndCurrency())
+                        </span>
+                    </h6>
+
+                </div>
+
+                <div class="row text-center ps-2">
+                    <div class="p-1 col-3 col-lg-2 bg-white border-bottom">
+                        <div class="text-dark text-opacity-50 fw-semibold">Quantity</div>
+                    </div>
+                    <div class="p-1 col-3 col-lg-2 bg-white border-bottom">
+                        <div class="text-dark text-opacity-50 fw-semibold">1-50</div>
+                    </div>
+                    <div class="p-1 col-3 col-lg-2 bg-white border-bottom">
+                        <div class="text-dark text-opacity-50 fw-semibold">51-100</div>
+                    </div>
+                    <div class="p-1 col-3 col-lg-2 bg-white border-bottom">
+                        <div class="text-dark text-opacity-50 fw-semibold">100+</div>
+                    </div>
+                </div>
+                <div class="row text-center ps-2">
+                    <div class="p-1 col-3 col-lg-2 bg-white text-warning fw-bold">
+                        <div>Price</div>
+                    </div>
+                    <div class="p-1 col-3 col-lg-2 bg-white text-warning fw-bold">
+                        <div>@Model.Price.ToString(StaticDetail.VndCurrency())</div>
+                    </div>
+                    <div class="p-1 col-3 col-lg-2 bg-white text-warning fw-bold">
+                        <div>@Model.Price50.ToString(StaticDetail.VndCurrency())</div>
+                    </div>
+                    <div class="p-1 col-3 col-lg-2 bg-white text-warning fw-bold">
+                        <div>@Model.Price100.ToString(StaticDetail.VndCurrency())</div>
+                    </div>
+                </div>
+
+                <div class="row pl-2 my-3">
+                    <div class="col-md-4">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text bg-primary text-white border-0 fw-semibold"
+                                  id="inputGroup-sizing-default">
+                                Count
+                            </span>
+                            <input type="number" value="1" class="form-control text-end"
+                                   aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" />
+
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" disabled
+                        class="btn btn-primary bg-gradient  w-100 py-2 text-uppercase fw-semibold">
+                    Add to Cart (Comming Soon...)
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+

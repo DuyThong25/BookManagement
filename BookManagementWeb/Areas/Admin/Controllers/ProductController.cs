@@ -108,33 +108,6 @@ namespace BookManagementWeb.Areas.Admin.Controllers
             }
             return @"\images\product\" + fileName;
         }
-        /*        public IActionResult Delete(int id)
-                {
-                    Product? product = _unitOfWork.Product.Get(x => x.ProductId == id);
-                    if (product == null)
-                    {
-                        return NotFound();
-                    }
-
-                    return View(product);
-                }*/
-        /* [HttpPost, ActionName("Delete")]
-         public IActionResult DeleteConfirm(int id)
-         {
-             Product? product = _unitOfWork.Product.Get(x => x.ProductId == id);
-             if (product != null)
-             {
-                 _unitOfWork.Product.Remove(product);
-                 _unitOfWork.Save();
-                 TempData["success"] = "Product delete successfully";
-                 return RedirectToAction("Index");
-
-             }
-             else
-             {
-                 return NotFound();
-             }
-         }*/
 
         #region Api Method
         [HttpDelete]

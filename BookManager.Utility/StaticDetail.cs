@@ -6,7 +6,12 @@ using System.Threading.Tasks;
 
 namespace BookManager.Utility
 {
-    internal static class StaticDetail
+    public static class StaticDetail
     {
+        //VND format
+        public static string VndCurrency()
+        {
+            return "#,##0.00 VNĐ";
+        }
     }
 }
