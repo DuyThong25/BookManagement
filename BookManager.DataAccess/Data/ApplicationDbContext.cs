@@ -13,6 +13,7 @@ namespace BookManager.DataAccess.Data
 
         public DbSet<Category> Categories { get; set; }
         public DbSet<Product> Products { get; set; }
+        public DbSet<ApplicationUser> ApplicationUsers { get; set; }
 
         // OnModelCreating Sử dụng để tạo dữ liệu cho csdl và 
         // Sử dụng migration để truyền dữ liệu xuống cho database
