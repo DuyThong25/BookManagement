@@ -11,11 +11,10 @@ namespace BookManager.Models
     public class ApplicationUser : IdentityUser
     {
         [Required]
-        public int Name { get; set; }
-        [Display(Name ="Address Number")]
-        public string? AddressNumber { get; set; }
-        [Display(Name = "Street Name")]
-        public string? StreetName { get; set; }
+        public string Name { get; set; }
+
+        public DateTime? BirthDay { get; set; }
+        public string? Address { get; set; }
         public string? Ward { get; set; }
         public string? District { get; set; }
         public string? City { get; set; }

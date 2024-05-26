@@ -6,6 +6,8 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using BookManager.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -58,24 +60,48 @@ namespace BookManagementWeb.Areas.Identity.Pages.Account.Manage
             [Phone]
             [Display(Name = "Phone number")]
             public string PhoneNumber { get; set; }
+
+            [Required]
+            [Display(Name = "Full name")]
+            public string Name { get; set; }
+            [Required]
+            [Display(Name = "Date of Birth")]
+            public DateTime? BirthDay { get; set; }
+
+            public string? Address { get; set; }
+            public string? Ward { get; set; }
+            public string? District { get; set; }
+            public string? City { get; set; }
+
+
         }
 
         private async Task LoadAsync(IdentityUser user)
         {
-            var userName = await _userManager.GetUserNameAsync(user);
-            var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
+            ApplicationUser applicationUser = (ApplicationUser)await _userManager.FindByIdAsync(user.Id);
+            //var userName = await _userManager.GetUserNameAsync(user);
+            //var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
+
+            var userName = applicationUser.UserName;
+            var phoneNumber = applicationUser.PhoneNumber;
 
             Username = userName;
-
             Input = new InputModel
             {
-                PhoneNumber = phoneNumber
+                PhoneNumber = phoneNumber,
+                Name = applicationUser.Name,
+                Address = applicationUser.Address,
+                Ward = applicationUser.Ward,
+                District = applicationUser.District,
+                City = applicationUser.City,
+                BirthDay = applicationUser.BirthDay,
             };
         }
 
         public async Task<IActionResult> OnGetAsync()
         {
             var user = await _userManager.GetUserAsync(User);
+
             if (user == null)
             {
                 return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
@@ -87,7 +113,9 @@ namespace BookManagementWeb.Areas.Identity.Pages.Account.Manage
 
         public async Task<IActionResult> OnPostAsync()
         {
-            var user = await _userManager.GetUserAsync(User);
+            //var user = await _userManager.GetUserAsync(User);
+            ApplicationUser user = (ApplicationUser)await _userManager.GetUserAsync(User);
+
             if (user == null)
             {
                 return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
@@ -110,6 +138,53 @@ namespace BookManagementWeb.Areas.Identity.Pages.Account.Manage
                 }
             }
 
+            if (Input.Name != user.Name)
+            {
+                user.Name = Input.Name;
+            }
+
+            if (Input.Address != user.Address)
+            {
+                user.Address = Input.Address;
+            }
+
+            if (Input.Ward != user.Ward)
+            {
+                user.Ward = Input.Ward;
+            }
+
+            if (Input.District != user.District)
+            {
+                user.District = Input.District;
+            }
+
+            if (Input.City != user.City)
+            {
+                user.City = Input.City;
+            }
+
+            if (Input.BirthDay != user.BirthDay)
+            {
+                if ((DateTime.Now.Year - DateTime.Parse(Input.BirthDay.ToString()).Year ) < 12 )
+                {
+                    StatusMessage = "Must be 12+ years old";
+                    return RedirectToPage();
+                }
+                else
+                {
+                    user.BirthDay = Input.BirthDay;  
+                }
+            }
+            try
+            {
+                await _userManager.UpdateAsync(user);
+            }
+            catch
+            {
+                StatusMessage = "Unexpected error when trying to update your profile.";
+                return RedirectToPage();
+
+            }
             await _signInManager.RefreshSignInAsync(user);
             StatusMessage = "Your profile has been updated";
             return RedirectToPage();

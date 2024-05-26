@@ -8,17 +8,64 @@
 <h3>@ViewData["Title"]</h3>
 <partial name="_StatusMessage" for="StatusMessage" />
 <div class="row">
-    <div class="col-md-6">
+    <div class="col-lg-12">
         <form id="profile-form" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-            <div class="form-floating mb-3">
-                <input asp-for="Username" class="form-control" placeholder="Please choose your username." disabled />
-                <label asp-for="Username" class="form-label"></label>
+            <div class="row">
+                <div class="col-6">
+                    <div class="form-floating mb-3">
+                        <input asp-for="Username" class="form-control" placeholder="Please choose your username." disabled />
+                        <label asp-for="Username" class="form-label"></label>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="form-floating mb-3">
+                        <input asp-for="Input.Name" class="form-control" placeholder="Please enter your name." />
+                        <label asp-for="Input.Name" class="form-label"></label>
+                        <span asp-validation-for="Input.Name" class="text-danger"></span>
+
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    <div class="form-floating mb-3">
+                        <input asp-for="Input.PhoneNumber" class="form-control" placeholder="Please enter your phone number." />
+                        <label asp-for="Input.PhoneNumber" class="form-label"></label>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="form-floating mb-3">
+                        <input asp-for="Input.BirthDay" class="form-control" placeholder="Please enter your birthDay." type="date" />
+                        <label asp-for="Input.BirthDay" class="form-label"></label>
+                        <span asp-validation-for="Input.BirthDay" class="text-danger"></span>
+
+                    </div>
+                </div>
             </div>
             <div class="form-floating mb-3">
-                <input asp-for="Input.PhoneNumber" class="form-control" placeholder="Please enter your phone number."/>
-                <label asp-for="Input.PhoneNumber" class="form-label"></label>
-                <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+                <input asp-for="Input.Address" class="form-control" placeholder="Please enter your address." />
+                <label asp-for="Input.Address" class="form-label"></label>
+            </div>
+            <div class="row">
+                <div class="col-4">
+                    <div class="form-floating mb-3">
+                        <input asp-for="Input.Ward" class="form-control" placeholder="Please enter your ward." />
+                        <label asp-for="Input.Ward" class="form-label"></label>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="form-floating mb-3">
+                        <input asp-for="Input.District" class="form-control" placeholder="Please enter your district." />
+                        <label asp-for="Input.District" class="form-label"></label>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="form-floating mb-3">
+                        <input asp-for="Input.City" class="form-control" placeholder="Please enter your city." />
+                        <label asp-for="Input.City" class="form-label"></label>
+                    </div>
+                </div>
             </div>
             <button id="update-profile-button" type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
         </form>
