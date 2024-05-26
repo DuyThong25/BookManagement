@@ -29,6 +29,11 @@
                         <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
                     </div>
                     <div class="form-floating mb-3">
+                        <input asp-for="Input.BirthDay" class="form-control" placeholder="Date Of Birth" type="date" value="" />
+                        <label asp-for="Input.BirthDay"></label>
+                        <span asp-validation-for="Input.BirthDay" class="text-danger"></span>
+                    </div>
+                    <div class="form-floating mb-3">
                         <select asp-for="Input.Role" asp-items="@Model.Input.RoleList" class="form-select">
                             <option selected disabled>-- Select Role -- </option>
                         </select>

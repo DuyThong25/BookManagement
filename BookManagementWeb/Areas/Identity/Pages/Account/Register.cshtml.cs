@@ -22,6 +22,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Shared;
 
 namespace BookManagementWeb.Areas.Identity.Pages.Account
 {
@@ -108,6 +109,9 @@ namespace BookManagementWeb.Areas.Identity.Pages.Account
             public string? Role { get; set; }
             [ValidateNever]
             public IEnumerable<SelectListItem> RoleList { get; set; }
+            [Display(Name = "Date of Birth")]
+            [Required]
+            public DateTime BirthDay { get; set; }
         }
 
 
@@ -137,12 +141,18 @@ namespace BookManagementWeb.Areas.Identity.Pages.Account
         {
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            if ((DateTime.Now.Year - DateTime.Parse(Input.BirthDay.ToString()).Year) < 12)
+            {
+                ModelState.AddModelError("Input.BirthDay", "Must be 12+ years old");
+            }
+
             if (ModelState.IsValid)
             {
                 var user = CreateUser();
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+                user.BirthDay = Input.BirthDay;
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
                 if (result.Succeeded)
@@ -155,7 +165,6 @@ namespace BookManagementWeb.Areas.Identity.Pages.Account
                     {
                         await _userManager.AddToRoleAsync(user, StaticDetail.Role_Customer);
                     }
-
                     _logger.LogInformation("User created a new account with password.");
 
                     var userId = await _userManager.GetUserIdAsync(user);
