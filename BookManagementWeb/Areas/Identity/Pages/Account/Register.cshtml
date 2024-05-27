@@ -39,7 +39,7 @@
                         </select>
                     </div>
                     <div class="form-floating mb-3 ">
-                        <select asp-for="Input.Company" asp-items="@Model.Input.CompanyList" class="form-select" style="display:none;">
+                        <select asp-for="Input.CompanyId" asp-items="@Model.Input.CompanyList" class="form-select" style="display:none;">
                             <option selected disabled>-- Select Company -- </option>
                         </select>
                     </div>
@@ -96,9 +96,9 @@
             document.getElementById("Input_Role").onchange = (e) => {
                 if (e.srcElement.value == "Company") {
                     console.log(e.srcElement.value)
-                    document.getElementById("Input_Company").style.display = "block";
+                    document.getElementById("Input_CompanyId").style.display = "block";
                 } else {
-                    document.getElementById("Input_Company").style.display = "none";
+                    document.getElementById("Input_CompanyId").style.display = "none";
                 }
             }
         })

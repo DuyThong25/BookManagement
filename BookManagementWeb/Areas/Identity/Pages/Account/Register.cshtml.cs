@@ -118,7 +118,7 @@ namespace BookManagementWeb.Areas.Identity.Pages.Account
             [Required]
             public DateTime BirthDay { get; set; }
 
-            public string Company { get; set; }
+            public int? CompanyId { get; set; }
             [ValidateNever]
             public IEnumerable<SelectListItem> CompanyList { get; set; }
 
@@ -168,6 +168,10 @@ namespace BookManagementWeb.Areas.Identity.Pages.Account
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
                 user.BirthDay = Input.BirthDay;
+                if(Input.Role == StaticDetail.Role_Company)
+                {
+                    user.CompanyID = Input.CompanyId;
+                }
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
                 if (result.Succeeded)
