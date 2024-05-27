@@ -57,7 +57,7 @@ namespace BookManagementWeb.Areas.Identity.Pages.Account.Manage
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
-            [Phone]
+            [Phone(ErrorMessage = "The Phone number field is not a valid phone number.")]
             [Display(Name = "Phone number")]
             public string PhoneNumber { get; set; }
 
@@ -167,8 +167,8 @@ namespace BookManagementWeb.Areas.Identity.Pages.Account.Manage
             {
                 if ((DateTime.Now.Year - DateTime.Parse(Input.BirthDay.ToString()).Year ) < 12 )
                 {
-                    StatusMessage = "Must be 12+ years old";
-                    return RedirectToPage();
+                    ModelState.AddModelError("Input.BirthDay", "Must be 12+ years old");
+                    return Page();
                 }
                 else
                 {

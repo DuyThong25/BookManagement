@@ -114,6 +114,14 @@ namespace BookManagementWeb.Areas.Admin.Controllers
         }
 
         #region Api Method
+
+        [HttpGet]
+        public IActionResult GetAll()
+        {
+            List<Product> listProduct = _unitOfWork.Product.GetAll().ToList();
+            return Json(new { data = listProduct });
+        }
+
         [HttpDelete]
         public IActionResult Delete(int id)
         {

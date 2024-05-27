@@ -10,6 +10,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading;
 using System.Threading.Tasks;
+using BookManager.DataAccess.Repository.IRepository;
 using BookManager.Models;
 using BookManager.Utility;
 using Microsoft.AspNetCore.Authentication;
@@ -35,6 +36,8 @@ namespace BookManagementWeb.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<IdentityUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly IUnitOfWork _unitOfWork;
+
 
         public RegisterModel(
             UserManager<IdentityUser> userManager,
@@ -42,7 +45,8 @@ namespace BookManagementWeb.Areas.Identity.Pages.Account
             SignInManager<IdentityUser> signInManager,
             RoleManager<IdentityRole> roleManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            IUnitOfWork unitOfWork)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -51,6 +55,7 @@ namespace BookManagementWeb.Areas.Identity.Pages.Account
             _roleManager = roleManager;
             _logger = logger;
             _emailSender = emailSender;
+            _unitOfWork = unitOfWork;
         }
 
         /// <summary>
@@ -112,6 +117,11 @@ namespace BookManagementWeb.Areas.Identity.Pages.Account
             [Display(Name = "Date of Birth")]
             [Required]
             public DateTime BirthDay { get; set; }
+
+            public int? CompanyId { get; set; }
+            [ValidateNever]
+            public IEnumerable<SelectListItem> CompanyList { get; set; }
+
         }
 
 
@@ -130,6 +140,11 @@ namespace BookManagementWeb.Areas.Identity.Pages.Account
                 {
                     Text = i,
                     Value = i
+                }),
+                CompanyList = _unitOfWork.Company.GetAll().Select(i => new SelectListItem
+                {
+                    Text = i.Name,
+                    Value = i.Id.ToString()
                 })
             };
 
@@ -153,6 +168,10 @@ namespace BookManagementWeb.Areas.Identity.Pages.Account
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
                 user.BirthDay = Input.BirthDay;
+                if(Input.Role == StaticDetail.Role_Company)
+                {
+                    user.CompanyID = Input.CompanyId;
+                }
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
                 if (result.Succeeded)
@@ -201,8 +220,14 @@ namespace BookManagementWeb.Areas.Identity.Pages.Account
                 {
                     Text = i,
                     Value = i
+                }),
+                CompanyList = _unitOfWork.Company.GetAll().Select(i => new SelectListItem
+                {
+                    Text = i.Name,
+                    Value = i.Id.ToString()
                 })
             };
+
             return Page();
         }
 
