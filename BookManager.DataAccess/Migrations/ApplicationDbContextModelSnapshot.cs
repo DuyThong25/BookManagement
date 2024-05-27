@@ -413,6 +413,9 @@ namespace BookManager.DataAccess.Migrations
                     b.Property<string>("City")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("CompanyID")
+                        .HasColumnType("int");
+
                     b.Property<string>("District")
                         .HasColumnType("nvarchar(max)");
 
@@ -424,6 +427,8 @@ namespace BookManager.DataAccess.Migrations
 
                     b.Property<string>("Ward")
                         .HasColumnType("nvarchar(max)");
+
+                    b.HasIndex("CompanyID");
 
                     b.HasDiscriminator().HasValue("ApplicationUser");
                 });
@@ -488,6 +493,15 @@ namespace BookManager.DataAccess.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("BookManager.Models.ApplicationUser", b =>
+                {
+                    b.HasOne("BookManager.Models.Company", "Company")
+                        .WithMany()
+                        .HasForeignKey("CompanyID");
+
+                    b.Navigation("Company");
                 });
 #pragma warning restore 612, 618
         }
