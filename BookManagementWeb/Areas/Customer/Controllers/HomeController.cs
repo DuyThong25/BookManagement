@@ -26,8 +26,11 @@ namespace BookManagementWeb.Areas.Customer.Controllers
 
         public IActionResult Detail(int id)
         {
-            Product product = _unitOfWork.Product.Get(x => x.ProductId == id, includeProperties: "Category");
-            return View(product);
+            ShoppingCart shoppingCart = new()
+            {
+                Product = _unitOfWork.Product.Get(x => x.ProductId == id, includeProperties: "Category")
+            };
+            return View(shoppingCart);
         }
 
         public IActionResult Privacy()
