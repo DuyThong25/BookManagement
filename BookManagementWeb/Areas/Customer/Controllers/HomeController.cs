@@ -41,7 +41,7 @@ namespace BookManagementWeb.Areas.Customer.Controllers
         [Authorize]
         public IActionResult Detail(ShoppingCart shoppingCart)
         {
-            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var claimsIdentity = User.Identity as ClaimsIdentity;
             var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
             shoppingCart.ApplicationUserId = userId;
             
