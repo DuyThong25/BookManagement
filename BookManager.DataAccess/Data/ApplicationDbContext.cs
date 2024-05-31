@@ -16,10 +16,13 @@ namespace BookManager.DataAccess.Data
         public DbSet<Company> Companies { get; set; }
 
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
+		public DbSet<OrderHeader> OrderHeaders { get; set; }
+		public DbSet<OrderDetail> OrderDetails { get; set; }
 
-        // OnModelCreating Sử dụng để tạo dữ liệu cho csdl và 
-        // Sử dụng migration để truyền dữ liệu xuống cho database
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+
+		// OnModelCreating Sử dụng để tạo dữ liệu cho csdl và 
+		// Sử dụng migration để truyền dữ liệu xuống cho database
+		protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
