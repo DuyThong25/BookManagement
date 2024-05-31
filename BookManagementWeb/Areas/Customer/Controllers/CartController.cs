@@ -12,10 +12,11 @@ namespace BookManagementWeb.Areas.Customer.Controllers
     public class CartController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
-        private ShoppingCartVM ShoppingCartVM;
+        private ShoppingCartVM _shoppingCartVM;
 
         public CartController(IUnitOfWork unitOfWork)
         {
+            _shoppingCartVM = new();
             _unitOfWork = unitOfWork;
         }
 
@@ -24,23 +25,42 @@ namespace BookManagementWeb.Areas.Customer.Controllers
             var claimsIdentity = User.Identity as ClaimsIdentity;
             var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
 
-            ShoppingCartVM = new()
+            _shoppingCartVM = new()
             {
-                ShoppingCartList = _unitOfWork.ShoppingCart.GetAll(x => x.ApplicationUserId == userId, includeProperties: "Product")
+                ShoppingCartList = _unitOfWork.ShoppingCart.GetAll(x => x.ApplicationUserId == userId, includeProperties: "Product"),
             };
 
 
-            foreach (var cart in ShoppingCartVM.ShoppingCartList)
+            foreach (var cart in _shoppingCartVM.ShoppingCartList)
             {
                 cart.Price = GetBasePrice(cart);
-                ShoppingCartVM.OrderTotal += (cart.Price * cart.Count);
+                _shoppingCartVM.OrderHeader.OrderTotal += (cart.Price * cart.Count);
             }
-            return View(ShoppingCartVM);
+            return View(_shoppingCartVM);
         }
 
         public IActionResult Summary()
         {
-            return View();
+            var claimsIdentity = User.Identity as ClaimsIdentity;
+            var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+            _shoppingCartVM.ShoppingCartList = _unitOfWork.ShoppingCart.GetAll(x => x.ApplicationUserId == userId, includeProperties: "Product");
+            _shoppingCartVM.OrderHeader.ApplicationUser = _unitOfWork.ApplicationUser.Get(x => x.Id == userId);
+            foreach (var cart in _shoppingCartVM.ShoppingCartList)
+            {
+                cart.Price = GetBasePrice(cart);
+                _shoppingCartVM.OrderHeader.OrderTotal += (cart.Price * cart.Count);
+            }
+
+            _shoppingCartVM.OrderHeader.Name = _shoppingCartVM.OrderHeader.ApplicationUser.Name;
+            _shoppingCartVM.OrderHeader.Address = _shoppingCartVM.OrderHeader.ApplicationUser.Address;
+            _shoppingCartVM.OrderHeader.Ward = _shoppingCartVM.OrderHeader.ApplicationUser.Ward;
+            _shoppingCartVM.OrderHeader.District = _shoppingCartVM.OrderHeader.ApplicationUser.District;
+            _shoppingCartVM.OrderHeader.City = _shoppingCartVM.OrderHeader.ApplicationUser.City;
+            _shoppingCartVM.OrderHeader.PhoneNumber = _shoppingCartVM.OrderHeader.ApplicationUser.PhoneNumber;
+
+
+            return View(_shoppingCartVM);
         }
 
         private double GetBasePrice(ShoppingCart shoppingCart)
@@ -62,35 +82,34 @@ namespace BookManagementWeb.Areas.Customer.Controllers
             }
         }
 
-        private double GetOrderTotal(ShoppingCart cartUpdate, bool isDelete)
+        private double GetOrderTotalAPI(ShoppingCart cartUpdate, bool isDelete)
         {
             var claimsIdentity = User.Identity as ClaimsIdentity;
             var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
 
-            ShoppingCartVM = new ShoppingCartVM();
             if (isDelete == true)
             {
-                ShoppingCartVM.ShoppingCartList = _unitOfWork.ShoppingCart.GetAll(x => x.ApplicationUserId == userId && x.Id != cartUpdate.Id, includeProperties: "Product");
+                _shoppingCartVM.ShoppingCartList = _unitOfWork.ShoppingCart.GetAll(x => x.ApplicationUserId == userId && x.Id != cartUpdate.Id, includeProperties: "Product");
             }
             else
             {
-                ShoppingCartVM.ShoppingCartList = _unitOfWork.ShoppingCart.GetAll(x => x.ApplicationUserId == userId, includeProperties: "Product");
+                _shoppingCartVM.ShoppingCartList = _unitOfWork.ShoppingCart.GetAll(x => x.ApplicationUserId == userId, includeProperties: "Product");
             }
 
-            foreach (var cart in ShoppingCartVM.ShoppingCartList)
+            foreach (var cart in _shoppingCartVM.ShoppingCartList)
             {
                 cart.Price = GetBasePrice(cart);
                 if (cart.Id == cartUpdate.Id)
                 {
                     // This is a cart being update count
-                    ShoppingCartVM.OrderTotal += (cart.Price * cartUpdate.Count);
+                    _shoppingCartVM.OrderHeader.OrderTotal += (cart.Price * cartUpdate.Count);
                 }
                 else
                 {
-                    ShoppingCartVM.OrderTotal += (cart.Price * cart.Count);
+                    _shoppingCartVM.OrderHeader.OrderTotal += (cart.Price * cart.Count);
                 }
             }
-            return ShoppingCartVM.OrderTotal;
+            return _shoppingCartVM.OrderHeader.OrderTotal;
         }
         #region Api Method
 
@@ -109,7 +128,7 @@ namespace BookManagementWeb.Areas.Customer.Controllers
             {
                 cartFromDb.Price = GetBasePrice(cartFromDb);
                 cartFromDb.Count += 1;
-                double orderTotal = GetOrderTotal(cartFromDb, false);
+                double orderTotal = GetOrderTotalAPI(cartFromDb, false);
                 _unitOfWork.ShoppingCart.Update(cartFromDb);
                 _unitOfWork.Save();
                 return Json(new { cart = cartFromDb, total = orderTotal });
@@ -130,14 +149,14 @@ namespace BookManagementWeb.Areas.Customer.Controllers
                 if (cartFromDb.Count == 0)
                 {
                     // Remove cart
-                    orderTotal = GetOrderTotal(cartFromDb, isDelete: true);
+                    orderTotal = GetOrderTotalAPI(cartFromDb, isDelete: true);
                     _unitOfWork.ShoppingCart.Remove(cartFromDb);
                     _unitOfWork.Save();
                     return Json(new { cart = cartFromDb, total = orderTotal });
                 }
                 else
                 {
-                    orderTotal = GetOrderTotal(cartFromDb, isDelete: false);
+                    orderTotal = GetOrderTotalAPI(cartFromDb, isDelete: false);
                     _unitOfWork.ShoppingCart.Update(cartFromDb);
                     _unitOfWork.Save();
                     return Json(new { cart = cartFromDb, total = orderTotal });
@@ -152,7 +171,7 @@ namespace BookManagementWeb.Areas.Customer.Controllers
             var cartFromDb = _unitOfWork.ShoppingCart.Get(x => x.Id == cartId, includeProperties: "Product");
             if (cartFromDb != null)
             {
-                double orderTotal = GetOrderTotal(cartFromDb, isDelete: true);
+                double orderTotal = GetOrderTotalAPI(cartFromDb, isDelete: true);
                 _unitOfWork.ShoppingCart.Remove(cartFromDb);
                 _unitOfWork.Save();
                 return Json(new { cart = cartFromDb, total = orderTotal });

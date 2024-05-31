@@ -8,7 +8,12 @@ namespace BookManager.Models.ViewModel
 {
     public class ShoppingCartVM
     {
+        public ShoppingCartVM()
+        {
+            OrderHeader = new();
+        }
+
         public IEnumerable<ShoppingCart> ShoppingCartList { get; set; }
-        public double OrderTotal { get; set; }
+        public OrderHeader OrderHeader { get; set; }
     }
 }
