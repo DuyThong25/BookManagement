@@ -39,9 +39,14 @@ namespace BookManager.DataAccess.Repository
             return query.FirstOrDefault();
         }
 
-        public IEnumerable<T> GetAll(string? includeProperties = null)
+        public IEnumerable<T> GetAll(Expression<Func<T, bool>>? fillter, string? includeProperties = null)
         {
             IQueryable<T> query = dbSet;
+            if (fillter != null)
+            {
+                query = query.Where(fillter);
+            }
+
             if (!String.IsNullOrEmpty(includeProperties))
             {
                 foreach (var includePro in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
