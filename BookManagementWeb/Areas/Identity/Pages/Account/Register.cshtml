@@ -42,6 +42,8 @@
                         <select asp-for="Input.CompanyId" asp-items="@Model.Input.CompanyList" class="form-select" style="display:none;">
                             <option selected disabled>-- Select Company -- </option>
                         </select>
+                        <span asp-validation-for="Input.CompanyId" class="text-danger"></span>
+
                     </div>
                     <div>
                         <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
@@ -93,6 +95,12 @@
     <partial name="_ValidationScriptsPartial" />
     <script>
         $(document).ready(function () {
+            console.log(document.getElementById("Input_Role").value)
+            if (document.getElementById("Input_Role").value == "Company") {
+                document.getElementById("Input_CompanyId").style.display = "block";
+            } else {
+                document.getElementById("Input_CompanyId").style.display = "none";
+            }
             document.getElementById("Input_Role").onchange = (e) => {
                 if (e.srcElement.value == "Company") {
                     console.log(e.srcElement.value)

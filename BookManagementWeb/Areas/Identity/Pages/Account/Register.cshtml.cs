@@ -160,6 +160,10 @@ namespace BookManagementWeb.Areas.Identity.Pages.Account
             {
                 ModelState.AddModelError("Input.BirthDay", "Must be 12+ years old");
             }
+            if(Input.Role == StaticDetail.Role_Company && String.IsNullOrEmpty(Input.CompanyId.ToString()))
+            {
+                ModelState.AddModelError("Input.CompanyId", "The Company field is required.");
+            }
 
             if (ModelState.IsValid)
             {
