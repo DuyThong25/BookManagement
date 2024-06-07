@@ -5,6 +5,7 @@ using BookManager.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using Stripe.Checkout;
 using System.Security.Claims;
 
 namespace BookManagementWeb.Areas.Customer.Controllers
@@ -71,7 +72,7 @@ namespace BookManagementWeb.Areas.Customer.Controllers
                 TempData["error"] = "Cart is null";
                 return RedirectToAction(nameof(Index));
             }
-            
+
         }
 
         [HttpPost]
@@ -121,11 +122,73 @@ namespace BookManagementWeb.Areas.Customer.Controllers
                 _unitOfWork.OrderDetail.Add(orderDetail);
                 _unitOfWork.Save();
             }
+
+            // qua trinh thanh toan cua normal customer
+            if (applicationUser.CompanyID.GetValueOrDefault() == 0)
+            {
+                var domain = "https://localhost:7121/";
+                var options = new Stripe.Checkout.SessionCreateOptions
+                {
+                    SuccessUrl = domain + $"customer/cart/OrderConfirmation?id={ShoppingCartVM.OrderHeader.Id}",
+                    CancelUrl = domain + "customer/cart/index",
+                    LineItems = new List<Stripe.Checkout.SessionLineItemOptions>(),
+                    Mode = "payment",
+                };
+                // configure san pham trong gio hang
+                foreach (var cart in ShoppingCartVM.ShoppingCartList)
+                {
+                    var sessionLineItem = new SessionLineItemOptions
+                    {
+                        PriceData = new SessionLineItemPriceDataOptions
+                        {
+                            UnitAmount = (long)(cart.Price * 100), // $20.5 => 2500
+                            Currency = "usd",
+                            ProductData = new SessionLineItemPriceDataProductDataOptions
+                            {
+                                Name = cart.Product.Title,
+                            }
+                        },
+                        Quantity = cart.Count
+                    };
+                    options.LineItems.Add(sessionLineItem);
+                }
+
+                var service = new Stripe.Checkout.SessionService();
+                Session session = service.Create(options);
+                _unitOfWork.OrderHeader.UpdateStripePaymentID(ShoppingCartVM.OrderHeader.Id, session.Id, session.PaymentIntentId); // PaymentIntentId = null vì chua hoan tat thanh toan
+                _unitOfWork.Save();
+
+                // Chuyen den trang checkout
+                Response.Headers.Add("Location", session.Url);
+                return new StatusCodeResult(303);
+            }
             return RedirectToAction(nameof(OrderConfirmation), new { id = ShoppingCartVM.OrderHeader.Id });
         }
 
         public IActionResult OrderConfirmation(int id)
         {
+            // Cap nhat OrderStatus va PaymentIntendID
+            var orderHeaderFromDB = _unitOfWork.OrderHeader.Get(u => u.Id == id, includeProperties: "ApplicationUser");
+            if (orderHeaderFromDB != null)
+            {
+                if (orderHeaderFromDB.PaymentStatus != StaticDetail.PaymentStatus_ApprovedForDelayedPayment)
+                {
+                    var service = new SessionService();
+                    Session session = service.Get(orderHeaderFromDB.SessionId);
+                    if (session.PaymentStatus.ToLower() == "paid")
+                    {
+                        _unitOfWork.OrderHeader.UpdateStripePaymentID(id, session.Id, session.PaymentIntentId);
+                        _unitOfWork.OrderHeader.UpdateStatus(id, StaticDetail.OrderStatus_Approved, StaticDetail.PaymentStatus_Approved);
+                        _unitOfWork.Save();
+
+                        //Clear cart
+                        List<ShoppingCart> shoppingCarts = _unitOfWork.ShoppingCart
+                            .GetAll(x => x.ApplicationUserId == orderHeaderFromDB.ApplicationUserId).ToList();
+                        _unitOfWork.ShoppingCart.RemoveRange(shoppingCarts);
+                        _unitOfWork.Save();
+                    }
+                }
+            }
             return View(id);
         }
 

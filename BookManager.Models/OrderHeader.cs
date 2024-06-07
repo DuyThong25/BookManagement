@@ -47,7 +47,7 @@ namespace BookManager.Models
 		[Required]
 		public string? PhoneNumber { get; set; }
 
-		[ForeignKey("ApplicationUserId)")]
+		[ForeignKey("ApplicationUserId")]
 		[ValidateNever]
 		public ApplicationUser ApplicationUser { get; set; }
 	}
