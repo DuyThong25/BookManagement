@@ -133,7 +133,7 @@ namespace BookManagementWeb.Areas.Admin.Controllers
                 _unitOfWork.Product.Remove(product);
                 _unitOfWork.Save();
                 HandleDeleteFileImage(product, wwwRootPath);
-                return Json(new { success = true, messag = "Delete Succesful" });
+                return Json(new { success = true, message = "Delete Succesful" });
             }
             else
             {
