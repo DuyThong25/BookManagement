@@ -52,7 +52,6 @@
                     </div>
                     <div>
                         <small class=" text-dark text-opacity-25">(1 x Price: @obj.Price.ToString("c"))</small>
-
                     </div>
                 </div>
                 <div class="col-md-3 col-3  d-flex align-items-center justify-content-center">
@@ -72,7 +71,7 @@
                 <ul class="list-group mb-4">
                     <li class="d-flex justify-content-between align-items-center">
                         <h5 class="text-dark fw-semibold text-uppercase"> Total (USD)</h5>
-                        <h4 id="totalOrder" class="text-dark fw-bolder">@Model.OrderTotal.ToString("c")</h4>
+                        <h4 id="totalOrder" class="text-dark fw-bolder">@Model.OrderHeader.OrderTotal.ToString("c")</h4>
                     </li>
                 </ul>
             </div>
@@ -97,14 +96,15 @@
             let currentCountSpan = element.previousElementSibling;
             let currentTotalCart = element.closest("div").parentElement.nextElementSibling.firstElementChild;
             let totalOrder = document.getElementById("totalOrder");
+            let unitPrice = currentCountSpan.parentElement.nextElementSibling.lastElementChild
             $.ajax({
                 url: '/customer/cart/plus/' + cartId,
                 type: 'PUT',
                 success: (data) => {
-                    console.log(data)
                     currentCountSpan.innerHTML = data.cart.count; // Update the count
                     currentTotalCart.innerHTML = formatter.format(data.cart.count * data.cart.price)
                     totalOrder.innerHTML = formatter.format(data.total);
+                    unitPrice.innerHTML = `(1 x Price: ${formatter.format(data.cart.price)})`
                 },
                 error: (e) => {
                     console.log(e);
@@ -116,6 +116,8 @@
             let currentCountSpan = element.nextElementSibling;
             let currentTotalCart = element.closest("div").parentElement.nextElementSibling.firstElementChild;
             let totalOrder = document.getElementById("totalOrder");
+            let unitPrice = currentCountSpan.parentElement.nextElementSibling.lastElementChild
+
             if ((parseInt(currentCountSpan.innerHTML) - 1) != 0) {
                 $.ajax({
                     url: '/customer/cart/minus/' + cartId,
@@ -128,6 +130,7 @@
                             currentCountSpan.innerHTML = data.cart.count; // Update the count
                             currentTotalCart.innerHTML = formatter.format(data.cart.count * data.cart.price)
                             totalOrder.innerHTML = formatter.format(data.total);
+                            unitPrice.innerHTML = `(1 x Price: ${formatter.format(data.cart.price)})`
                         }
                     },
                     error: (e) => {
@@ -157,7 +160,6 @@
                         url: '/customer/cart/delete/' + cartId,
                         type: 'DELETE',
                         success: (data) => {
-                            console.log(data)
                             element.closest(".row").remove();
                             totalOrder.innerHTML = formatter.format(data.total);
                         },

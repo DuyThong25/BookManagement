@@ -13,6 +13,17 @@ namespace BookManager.Utility
         public const string Role_Admin = "Admin";
         public const string Role_Employee = "Employee";
 
+        public static string OrderStatus_Pending = "Pending";
+        public static string OrderStatus_Approved = "Approved";
+        public static string OrderStatus_Processing = "Processing";
+        public static string OrderStatus_Shipped = "Shipped";
+
+        public static string PaymentStatus_Pending = "Pending";
+        public static string PaymentStatus_Approved = "Approved";
+        public static string PaymentStatus_ApprovedForDelayedPayment = "ApprovedForDelayedPayment";
+
+
+
         //VND format
         public static string VndCurrency()
         {
