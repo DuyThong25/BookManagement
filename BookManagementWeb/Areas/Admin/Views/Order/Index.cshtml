@@ -1,0 +1,61 @@
+﻿@model List<OrderHeader>;
+@{
+    ViewData["Title"] = "Index Order";
+}
+<div class="container-fluid">
+    <div class="card shadow border-1 mt-4">
+        <div class="card-header bg-secondary bg-gradient  py-3">
+            <div class="row">
+                <div class="col-12 text-center text-white">
+                    <h2>List Order</h2>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="myTable" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Order Date</th>
+                            <th>Name</th>
+                            <th>Phone Number</th>
+                            <th>Email</th>
+                            <th>Order Status</th>
+                            <th>Payment Status</th>
+                            <th>Total</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (OrderHeader item in Model)
+                        {
+                            <tr>
+                                <td>@item.Id</td>
+                                <td>@item.OrderDate.ToShortDateString()</td>
+                                <td>@item.Name</td>
+                                <td>@item.PhoneNumber</td>
+                                <td>@item.ApplicationUser.Email</td>
+                                <td>@item.OrderStatus</td>
+                                <td>@item.PaymentStatus</td>
+                                <td>@item.OrderTotal.ToString("c")</td>
+                                <td class="text-center">
+                                    <div class="w-100 btn-group" role="group">
+                                        <a asp-controller="Order" asp-action="Details" asp-route-orderId="@item.Id" class="btn btn-primary mx-2">
+                                            <i class="bi bi-pencil-square"> Detail</i>
+                                        </a>
+                                        @* <a onclick="DeleteConfirm('/admin/product/delete/@item.ProductId', this)" class="btn btn-outline-danger mx-2">
+                                            <i class="bi bi-trash"> Delete</i>
+                                        </a> *@
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+</div>
+
