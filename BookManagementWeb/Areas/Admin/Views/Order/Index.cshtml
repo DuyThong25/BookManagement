@@ -14,8 +14,8 @@
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <div class="nav nav-tabs" role="tablist">
-                    <a class="btn nav-link active" onclick="filterStatus('all', this)">All</a>
+                <div class="nav nav-tabs my-3" role="tablist">
+                    <a class="btn nav-link bg-primary text-white" onclick="filterStatus('all', this)">All</a>
                     <a class="btn nav-link" onclick="filterStatus('approved', this)">Approved</a>
                     <a class="btn nav-link" onclick="filterStatus('completed', this)">Completed</a>
                     <a class="btn nav-link" onclick="filterStatus('inprocess', this)">In Process</a>
@@ -77,11 +77,11 @@
             // Loại bỏ lớp 'active' khỏi tất cả các tab
             var tabs = document.querySelectorAll('.nav-link');
             tabs.forEach(function (tab) {
-                tab.classList.remove('active');
+                tab.classList.remove('bg-primary', 'text-white');
             });
 
             // Thêm lớp 'active' vào tab được chọn
-            element.classList.add('active');
+            element.classList.add('bg-primary', 'text-white');
 
             $('#myTable').DataTable({
                 "bDestroy": true,
