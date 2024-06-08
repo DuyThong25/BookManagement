@@ -1,9 +1,11 @@
 ﻿using BookManager.DataAccess.Repository.IRepository;
+using BookManager.Models;
 using BookManager.Models.ViewModel;
 using BookManager.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections;
 
 namespace BookManagementWeb.Areas.Admin.Controllers
 {
@@ -24,7 +26,7 @@ namespace BookManagementWeb.Areas.Admin.Controllers
 
         public IActionResult Details(int orderId)
         {
-            OrderVM? orderVM = new()
+            OrderVM orderVM = new()
             {
                 OrderHeader = _unitOfWork.OrderHeader.Get(x => x.Id == orderId, includeProperties: "ApplicationUser"),
                 OrderDetails = _unitOfWork.OrderDetail.GetAll(x => x.OrderHeaderId == orderId).ToList()
@@ -34,6 +36,36 @@ namespace BookManagementWeb.Areas.Admin.Controllers
         }
 
         #region API Method
+        [HttpGet("admin/order/statusorder/{status}")]
+        public IActionResult StatusOrder(string status)
+        {
+            IEnumerable<OrderHeader> listOrderHeader;
+            switch (status)
+            {
+                case "approved":
+                    listOrderHeader = _unitOfWork.OrderHeader
+                        .GetAll(x => x.OrderStatus == StaticDetail.OrderStatus_Approved, includeProperties: "ApplicationUser").ToList();
+                    break;
+                case "completed":
+                    listOrderHeader = _unitOfWork.OrderHeader
+                        .GetAll(x => x.OrderStatus == StaticDetail.OrderStatus_Shipped, includeProperties: "ApplicationUser").ToList();
+                    break;
+                case "inprocess":
+                    listOrderHeader = _unitOfWork.OrderHeader
+                        .GetAll(x => x.OrderStatus == StaticDetail.OrderStatus_Processing, includeProperties: "ApplicationUser").ToList();
+                    break;
+                case "pending":
+                    listOrderHeader = _unitOfWork.OrderHeader
+                        .GetAll(x => x.OrderStatus == StaticDetail.OrderStatus_Pending, includeProperties: "ApplicationUser").ToList();
+                    break;
+                default:
+                    // All
+                    listOrderHeader = _unitOfWork.OrderHeader.GetAll(includeProperties: "ApplicationUser").ToList();
+                    break;
+            }
+            return Json(new {data = listOrderHeader });
+        }
+
         [HttpDelete]
         public IActionResult Delete(int id)
         {
