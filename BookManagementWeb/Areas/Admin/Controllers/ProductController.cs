@@ -12,8 +12,7 @@ using System.Collections.Generic;
 namespace BookManagementWeb.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = StaticDetail.Role_Admin)]
-
+    [Authorize(Roles = StaticDetail.Role_Admin + "," + StaticDetail.Role_Employee)]
     public class ProductController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;

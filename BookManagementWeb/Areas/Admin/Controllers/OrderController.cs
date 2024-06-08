@@ -10,7 +10,7 @@ using System.Collections;
 namespace BookManagementWeb.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = StaticDetail.Role_Admin)]
+    [Authorize(Roles = StaticDetail.Role_Admin + "," + StaticDetail.Role_Employee)]
     public class OrderController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -29,7 +29,7 @@ namespace BookManagementWeb.Areas.Admin.Controllers
             OrderVM orderVM = new()
             {
                 OrderHeader = _unitOfWork.OrderHeader.Get(x => x.Id == orderId, includeProperties: "ApplicationUser"),
-                OrderDetails = _unitOfWork.OrderDetail.GetAll(x => x.OrderHeaderId == orderId).ToList()
+                OrderDetails = _unitOfWork.OrderDetail.GetAll(x => x.OrderHeaderId == orderId, includeProperties: "Product").ToList()
             };
 
             return View(orderVM);

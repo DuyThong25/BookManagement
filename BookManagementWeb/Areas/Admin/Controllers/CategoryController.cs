@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace BookManagementWeb.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = StaticDetail.Role_Admin)]
+    [Authorize(Roles = StaticDetail.Role_Admin + "," + StaticDetail.Role_Employee)]
 
     public class CategoryController : Controller
     {
