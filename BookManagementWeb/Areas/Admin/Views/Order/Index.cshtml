@@ -21,7 +21,7 @@
                     <a class="btn nav-link" onclick="filterStatus('inprocess', this)">In Process</a>
                     <a class="btn nav-link" onclick="filterStatus('pending', this)">Pending</a>
                 </div>
-                <table id="myTable" class="table table-bordered table-striped">
+                <table id="myTable" class="table table-bordered table-striped w-100">
                     <thead>
                         <tr>
                             <th>Id</th>
@@ -40,7 +40,7 @@
                         {
                             <tr>
                                 <td>@item.Id</td>
-                                <td>@item.OrderDate.ToString("dd-MMM-yyyy")</td>
+                                <td>@item.OrderDate?.ToString("dd-MMM-yyyy")</td>
                                 <td>@item.Name</td>
                                 <td>@item.PhoneNumber</td>
                                 <td>@item.ApplicationUser.Email</td>
@@ -116,7 +116,7 @@
                         data: 'id',
                         "render": function (data) {
                             return ` <div class="w-100 btn-group" role="group">
-                                        <a asp-controller="Order" asp-action="Details" asp-route-orderId="${data}" class="btn btn-primary mx-2">
+                                        <a href="/Admin/Order/Details?orderId=${data}" class="btn btn-primary mx-2">
                                             <i class="bi bi-pencil-square"> Detail</i>
                                         </a>
                                         @* <a onclick="DeleteConfirm('/admin/product/delete/@item.ProductId', this)" class="btn btn-outline-danger mx-2">
