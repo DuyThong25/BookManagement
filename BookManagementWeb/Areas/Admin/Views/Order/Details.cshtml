@@ -1,44 +1,46 @@
 ﻿@model OrderVM
 @{
-    ViewData["Title"] = "Detail Order";
+    ViewData["Title"] = "Order Summary";
 
     var formatOrderDate = @Model.OrderHeader.OrderDate?.ToString("dd-MM-yyyy, HH:mm:ss");
-    var formatPaymentDueDate = @Model.OrderHeader.PaymentDueDate?.ToString("dd-MM-yyyy");
     var formatShippingDate = @Model.OrderHeader.ShippingDate?.ToString("dd-MM-yyyy, HH:mm:ss");
     var formatPaymentDate = @Model.OrderHeader.PaymentDate?.ToString("dd-MM-yyyy, HH:mm:ss");
 
 }
 
 <form method="post">
+    <input asp-for="@Model.OrderHeader.Id" hidden />
     <br />
     <div class="container">
         <div class="card">
             <div class="card-header bg-primary text-light ml-0">
                 <div class="container row">
                     <div class="col-12 pb-1 h2 text-center text-uppercase">
-                        <i class="fas fa-shopping-cart fw-bold"></i> &nbsp; Order Details
+                        <i class="fas fa-shopping-cart fw-bold"></i> &nbsp; Order Summary
                     </div>
                 </div>
             </div>
             <div class="card-body">
                 <div class="container rounded p-2">
-                    <div class="text-dark text-opacity-50 mb-4">
+                    <div class="text-dark text-opacity-50 px-3">
                         <a asp-action="Index" class="btn btn-outline-dark">
                             <i class="bi bi-caret-left"></i> Back to Orders
                         </a>
                     </div>
                     <div class="row">
                         <div class="col-12 col-lg-6 pb-4">
-                            <div class="shadow rounded rounded-2 px-1 my-4">
+                            <div class="shadow rounded rounded-2 p-3 ">
                                 <div class="row">
                                     <h4 class="d-flex justify-content-between align-items-center ">
-                                        <p class="text-primary fw-bold">Information Details:</p>
+                                        <p class="text-primary fw-bold">Pickup Information:</p>
                                     </h4>
                                 </div>
+                                <p class="divider-text d-flex opacity-50">
+                                    Information customer
+                                </p>
                                 <div class="row my-1">
                                     <div class="col-3">Order Date</div>
                                     <div class="col-9">
-
                                         <input readonly value="@formatOrderDate" type="text" class="form-control" />
                                         <span asp-validation-for="@Model.OrderHeader.OrderDate" class="text-danger"></span>
                                     </div>
@@ -46,7 +48,7 @@
                                 <div class="row my-1">
                                     <div class="col-3">Email</div>
                                     <div class="col-9">
-                                        <input asp-for="@Model.OrderHeader.ApplicationUser.Email" type="email" class="form-control" />
+                                        <input readonly asp-for="@Model.OrderHeader.ApplicationUser.Email" type="email" class="form-control" />
                                         <span asp-validation-for="@Model.OrderHeader.ApplicationUser.Email" class="text-danger"></span>
                                     </div>
                                 </div>
@@ -95,27 +97,31 @@
                             </div>
                             @if (Model.OrderHeader.SessionId == null)
                             {
-                                <h4 class="d-flex justify-content-between align-items-center">
-                                    <p class="text-primary fw-bold">Payment Information:</p>
-                                </h4>
-                                <div class="row my-1">
-                                    <div class="col-3 ">Payment Due Date</div>
-                                    <div class="col-9">
-                                        <input value="@formatPaymentDueDate" type="date" class="form-control text-danger" />
-                                        <span asp-validation-for="@Model.OrderHeader.PaymentDueDate" class="text-danger"></span>
+                                <div class="p-3">
+                                    <h4 class="d-flex justify-content-between align-items-center">
+                                        <p class="text-primary fw-bold">Payment Information:</p>
+                                    </h4>
+                                    <div class="row my-1">
+                                        <div class="col-3 ">Payment Due Date</div>
+                                        <div class="col-9">
+                                            <input asp-for="@Model.OrderHeader.PaymentDueDate" type="date" class="form-control text-danger" />
+                                            <span asp-validation-for="@Model.OrderHeader.PaymentDueDate" class="text-danger"></span>
+                                        </div>
                                     </div>
                                 </div>
                             }
                             else
                             {
-                                <div class="shadow rounded rounded-2 px-1 my-4">
-                                    <h4 class="d-flex justify-content-between align-items-center">
-                                        <p class="text-primary fw-bold">Shipping Information:</p>
-                                    </h4>
+
+                                <div class="shadow rounded rounded-2 p-3 ">
+                                    <p class="divider-text d-flex mt-3 opacity-50">
+                                        Shipping Information
+                                    </p>
                                     <div class="row my-1">
                                         <div class="col-3">Shipping Date</div>
                                         <div class="col-9">
-                                            <input asp-for="@Model.OrderHeader.ShippingDate" value="@formatShippingDate" type="date" readonly class="form-control" />
+                                            <input asp-for="@Model.OrderHeader.ShippingDate" value="@formatShippingDate" type="datetime" readonly class="form-control" />
+                                            <span asp-validation-for="@Model.OrderHeader.ShippingDate" class="text-danger"></span>
                                         </div>
                                     </div>
                                     <div class="row my-1">
@@ -133,14 +139,14 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="shadow rounded rounded-2 px-1 my-4">
-                                    <h4 class="d-flex justify-content-between align-items-center">
-                                        <p class="text-primary fw-bold">Payment Information:</p>
-                                    </h4>
+                                <div class="shadow rounded rounded-2 p-3">
+                                    <p class="divider-text d-flex mt-3 opacity-50">
+                                        Payment Information
+                                    </p>
                                     <div class="row my-1">
                                         <div class="col-3">Payment Date</div>
                                         <div class="col-9">
-                                            <input asp-for="@Model.OrderHeader.PaymentDate" value="@formatPaymentDate" type="date" class="form-control" />
+                                            <input readonly asp-for="@Model.OrderHeader.PaymentDate" value="@formatPaymentDate" type="datetime" class="form-control" />
                                             <span asp-validation-for="@Model.OrderHeader.PaymentDate" class="text-danger"></span>
                                         </div>
                                     </div>
@@ -159,12 +165,15 @@
                                 </div>
 
                             }
-                            <input type="submit" class="btn btn-warning form-control my-1" value="Update Order Details" />
+                            <button type="submit" asp-action="UpdateOrderDetails" class="btn btn-warning form-control my-1">
+                                Update Pickup Information
+
+                            </button>
 
                         </div>
-                        <div class="col-12 col-lg-5 offset-lg-1 shadow rounded rounded-2 px-1 my-4">
+                        <div class="col-12 col-lg-5 offset-lg-1 shadow rounded rounded-2 p-3">
                             <h4 class="d-flex justify-content-between align-items-center">
-                                <p class="text-primary fw-bold">Order Summary</p>
+                                <p class="text-primary fw-bold">Order Details</p>
                             </h4>
                             <label class="btn-outline-primary text-center fw-semibold form-control my-2">
                                 Order Status - @{

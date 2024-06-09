@@ -53,8 +53,8 @@
                                             <i class="bi bi-pencil-square"> Detail</i>
                                         </a>
                                         @* <a onclick="DeleteConfirm('/admin/product/delete/@item.ProductId', this)" class="btn btn-outline-danger mx-2">
-                                    <i class="bi bi-trash"> Delete</i>
-                                    </a> *@
+                                            <i class="bi bi-trash"> Delete</i>
+                                        </a> *@
                                     </div>
                                 </td>
                             </tr>
@@ -106,23 +106,23 @@
                     { data: 'applicationUser.email' },
                     { data: 'orderStatus' },
                     { data: 'paymentStatus' },
-                    { 
-                        data: 'orderTotal' ,
+                    {
+                        data: 'orderTotal',
                         "render": function (data) {
                             return `${formatter.format(data)}`
-                        }                 
+                        }
                     },
                     {
                         data: 'id',
                         "render": function (data) {
                             return ` <div class="w-100 btn-group" role="group">
-                                        <a href="/Admin/Order/Details?orderId=${data}" class="btn btn-primary mx-2">
-                                            <i class="bi bi-pencil-square"> Detail</i>
-                                        </a>
-                                        @* <a onclick="DeleteConfirm('/admin/product/delete/@item.ProductId', this)" class="btn btn-outline-danger mx-2">
-                                            <i class="bi bi-trash"> Delete</i>
-                                        </a> *@
-                                    </div>`
+                                                <a href="/Admin/Order/Details?orderId=${data}" class="btn btn-primary mx-2">
+                                                    <i class="bi bi-pencil-square"> Detail</i>
+                                                </a>
+        @* <a onclick="DeleteConfirm('/admin/product/delete/@item.ProductId', this)" class="btn btn-outline-danger mx-2">
+                                                <i class="bi bi-trash"> Delete</i>
+                                            </a> *@
+                                            </div>`
                         }
                     }
                 ]
