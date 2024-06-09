@@ -5,6 +5,7 @@ using BookManager.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Stripe.Climate;
 using System.Collections;
 
 namespace BookManagementWeb.Areas.Admin.Controllers
@@ -14,6 +15,8 @@ namespace BookManagementWeb.Areas.Admin.Controllers
     public class OrderController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
+        [BindProperty]
+        public OrderVM OrderVM { get; set; }
         public OrderController(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
@@ -26,13 +29,46 @@ namespace BookManagementWeb.Areas.Admin.Controllers
 
         public IActionResult Details(int orderId)
         {
-            OrderVM orderVM = new()
+            OrderVM = new()
             {
                 OrderHeader = _unitOfWork.OrderHeader.Get(x => x.Id == orderId, includeProperties: "ApplicationUser"),
                 OrderDetails = _unitOfWork.OrderDetail.GetAll(x => x.OrderHeaderId == orderId, includeProperties: "Product").ToList()
             };
+            return View(OrderVM);
+        }
 
-            return View(orderVM);
+        [HttpPost]
+        public IActionResult UpdateOrderDetails()
+        {
+            var orderHeaderFromDB = _unitOfWork.OrderHeader.Get(x => x.Id == OrderVM.OrderHeader.Id, includeProperties: "ApplicationUser");
+            if (orderHeaderFromDB != null)
+            {
+                orderHeaderFromDB.Name = OrderVM.OrderHeader.Name;
+                orderHeaderFromDB.PhoneNumber = OrderVM.OrderHeader.PhoneNumber;
+                orderHeaderFromDB.Address = OrderVM.OrderHeader.Address;
+                orderHeaderFromDB.Ward = OrderVM.OrderHeader.Ward;
+                orderHeaderFromDB.District = OrderVM.OrderHeader.District;
+                orderHeaderFromDB.City = OrderVM.OrderHeader.City;
+                if (OrderVM.OrderHeader.SessionId == null)
+                {
+                    orderHeaderFromDB.PaymentDueDate = OrderVM.OrderHeader.PaymentDueDate;
+                }
+                else
+                {
+                    orderHeaderFromDB.ShippingDate = OrderVM.OrderHeader.ShippingDate;
+                    orderHeaderFromDB.Carrier = OrderVM.OrderHeader.Carrier;
+                    orderHeaderFromDB.TrackingNumber = OrderVM.OrderHeader.TrackingNumber;
+                }
+                _unitOfWork.OrderHeader.Update(orderHeaderFromDB);
+                _unitOfWork.Save();
+                TempData["Success"] = "Pickup Information Update Successfully.";
+
+                return RedirectToAction(nameof(Details), new { orderId = orderHeaderFromDB.Id });
+            }
+            else
+            {
+                return NotFound();
+            }
         }
 
         #region API Method
@@ -63,30 +99,30 @@ namespace BookManagementWeb.Areas.Admin.Controllers
                     listOrderHeader = _unitOfWork.OrderHeader.GetAll(includeProperties: "ApplicationUser").ToList();
                     break;
             }
-            return Json(new {data = listOrderHeader });
+            return Json(new { data = listOrderHeader });
         }
 
-        [HttpDelete]
-        public IActionResult Delete(int id)
-        {
-            //OrderVM? orderVM = _unitOfWork.Product.Get(x => x.ProductId == id);
-            OrderVM? orderVM = new()
-            {
-                OrderHeader = _unitOfWork.OrderHeader.Get(x => x.Id == id, includeProperties: "ApplicationUser"),
-                OrderDetails = _unitOfWork.OrderDetail.GetAll(x => x.OrderHeaderId == id).ToList()
-            };
+        //[HttpDelete]
+        //public IActionResult Delete(int id)
+        //{
+        //    //OrderVM? orderVM = _unitOfWork.Product.Get(x => x.ProductId == id);
+        //    OrderVM? orderVM = new()
+        //    {
+        //        OrderHeader = _unitOfWork.OrderHeader.Get(x => x.Id == id, includeProperties: "ApplicationUser"),
+        //        OrderDetails = _unitOfWork.OrderDetail.GetAll(x => x.OrderHeaderId == id).ToList()
+        //    };
 
-            if (orderVM != null)
-            {
-                //_unitOfWork.Product.Remove(product);
-                //_unitOfWork.Save();
-                return Json(new { success = true, message = "Delete Succesful" });
-            }
-            else
-            {
-                return Json(new { success = false, message = "Delete Fail" });
-            }
-        }
+        //    if (orderVM != null)
+        //    {
+        //        //_unitOfWork.Product.Remove(product);
+        //        //_unitOfWork.Save();
+        //        return Json(new { success = true, message = "Delete Succesful" });
+        //    }
+        //    else
+        //    {
+        //        return Json(new { success = false, message = "Delete Fail" });
+        //    }
+        //}
         #endregion
     }
 }
