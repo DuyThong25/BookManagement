@@ -55,43 +55,85 @@
                                 <div class="row my-1">
                                     <div class="col-3">Name</div>
                                     <div class="col-9">
-                                        <input asp-for="@Model.OrderHeader.Name" type="text" class="form-control" />
-                                        <span asp-validation-for="@Model.OrderHeader.Name" class="text-danger"></span>
+                                        @if (Model.OrderHeader.OrderStatus != StaticDetail.OrderStatus_Shipped)
+                                        {
+                                            <input asp-for="@Model.OrderHeader.Name" type="text" class="form-control" />
+                                            <span asp-validation-for="@Model.OrderHeader.Name" class="text-danger"></span>
+                                        }
+                                        else
+                                        {
+                                            <input readonly asp-for="@Model.OrderHeader.Name" type="text" class="form-control" />
+                                        }
                                     </div>
                                 </div>
                                 <div class="row my-1">
                                     <div class="col-3">Phone</div>
                                     <div class="col-9">
-                                        <input asp-for="@Model.OrderHeader.PhoneNumber" type="tel" class="form-control" />
-                                        <span asp-validation-for="@Model.OrderHeader.PhoneNumber" class="text-danger"></span>
+                                        @if (Model.OrderHeader.OrderStatus != StaticDetail.OrderStatus_Shipped)
+                                        {
+                                            <input asp-for="@Model.OrderHeader.PhoneNumber" type="text" class="form-control" />
+                                            <span asp-validation-for="@Model.OrderHeader.PhoneNumber" class="text-danger"></span>
+                                        }
+                                        else
+                                        {
+                                            <input readonly asp-for="@Model.OrderHeader.PhoneNumber" type="text" class="form-control" />
+                                        }
                                     </div>
                                 </div>
                                 <div class="row my-1">
                                     <div class="col-3">Address</div>
                                     <div class="col-9">
-                                        <input asp-for="@Model.OrderHeader.Address" type="text" class="form-control" />
-                                        <span asp-validation-for="@Model.OrderHeader.Address" class="text-danger"></span>
+                                        @if (Model.OrderHeader.OrderStatus != StaticDetail.OrderStatus_Shipped)
+                                        {
+                                            <input asp-for="@Model.OrderHeader.Address" type="text" class="form-control" />
+                                            <span asp-validation-for="@Model.OrderHeader.Address" class="text-danger"></span>
+                                        }
+                                        else
+                                        {
+                                            <input readonly asp-for="@Model.OrderHeader.Address" type="text" class="form-control" />
+                                        }
                                     </div>
                                 </div>
                                 <div class="row my-1">
                                     <div class="col-3">Ward</div>
                                     <div class="col-9">
-                                        <input asp-for="@Model.OrderHeader.Ward" type="text" class="form-control" />
-                                        <span asp-validation-for="@Model.OrderHeader.Name" class="text-danger"></span>
+                                        @if (Model.OrderHeader.OrderStatus != StaticDetail.OrderStatus_Shipped)
+                                        {
+                                            <input asp-for="@Model.OrderHeader.Ward" type="text" class="form-control" />
+                                            <span asp-validation-for="@Model.OrderHeader.Ward" class="text-danger"></span>
+                                        }
+                                        else
+                                        {
+                                            <input readonly asp-for="@Model.OrderHeader.Ward" type="text" class="form-control" />
+                                        }
                                     </div>
                                 </div>
                                 <div class="row my-1">
                                     <div class="col-3">District</div>
                                     <div class="col-9">
-                                        <input asp-for="@Model.OrderHeader.District" type="text" class="form-control" />
-                                        <span asp-validation-for="@Model.OrderHeader.District" class="text-danger"></span>
+                                        @if (Model.OrderHeader.OrderStatus != StaticDetail.OrderStatus_Shipped)
+                                        {
+                                            <input asp-for="@Model.OrderHeader.District" type="text" class="form-control" />
+                                            <span asp-validation-for="@Model.OrderHeader.District" class="text-danger"></span>
+                                        }
+                                        else
+                                        {
+                                            <input readonly asp-for="@Model.OrderHeader.District" type="text" class="form-control" />
+                                        }
                                     </div>
                                 </div>
                                 <div class="row my-1">
                                     <div class="col-3">City</div>
                                     <div class="col-9">
-                                        <input asp-for="@Model.OrderHeader.City" type="text" class="form-control" />
-                                        <span asp-validation-for="@Model.OrderHeader.City" class="text-danger"></span>
+                                        @if (Model.OrderHeader.OrderStatus != StaticDetail.OrderStatus_Shipped)
+                                        {
+                                            <input asp-for="@Model.OrderHeader.City" type="text" class="form-control" />
+                                            <span asp-validation-for="@Model.OrderHeader.City" class="text-danger"></span>
+                                        }
+                                        else
+                                        {
+                                            <input readonly asp-for="@Model.OrderHeader.City" type="text" class="form-control" />
+                                        }
                                     </div>
                                 </div>
                             </div>
@@ -165,11 +207,37 @@
                                 </div>
 
                             }
-                            <button type="submit" asp-action="UpdateOrderDetails" class="btn btn-warning form-control my-1">
-                                Update Pickup Information
-
-                            </button>
-
+                            @if (User.IsInRole(StaticDetail.Role_Admin) || User.IsInRole(StaticDetail.Role_Employee))
+                            {
+                                @if (Model.OrderHeader.OrderStatus != StaticDetail.OrderStatus_Shipped)
+                                {
+                                    <button type="submit" asp-action="UpdateOrderDetails" class="btn btn-warning form-control my-1">
+                                        Update Pickup Information
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button disabled tilte="In Process" class="btn btn-warning form-control my-1">
+                                        Update Pickup Information
+                                    </button>
+                                }
+                            }
+                            else
+                            {
+                                @if (Model.OrderHeader.OrderStatus == StaticDetail.OrderStatus_Approved ||
+                               Model.OrderHeader.OrderStatus == StaticDetail.OrderStatus_Pending)
+                                {
+                                    <button type="submit" asp-action="UpdateOrderDetails" class="btn btn-warning form-control my-1">
+                                        Update Pickup Information
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button disabled tilte="In Process" class="btn btn-warning form-control my-1">
+                                        Update Pickup Information
+                                    </button>
+                                }
+                            }
                         </div>
                         <div class="col-12 col-lg-5 offset-lg-1 shadow rounded rounded-2 p-3">
                             <h4 class="d-flex justify-content-between align-items-center">
@@ -218,10 +286,28 @@
                                     </div>
                                 </li>
                             </ul>
-                            <input type="submit" class="btn btn-success form-control my-1" value="Pay Now" />
-                            <input type="submit" class="btn btn-primary form-control my-1" value="Start Processing" />
-                            <input type="submit" class="btn btn-primary form-control my-1" value="Ship Order" />
-                            <input type="submit" class="btn btn-danger form-control my-1" value="Cancel Order" />
+                            @if (Model.OrderHeader.OrderStatus == StaticDetail.OrderStatus_Shipped &&
+                            Model.OrderHeader.PaymentStatus == StaticDetail.PaymentStatus_ApprovedForDelayedPayment)
+                            {
+                                <button type="submit" class="btn btn-success form-control my-1">Pay Now </button>
+                            }
+                            @if (User.IsInRole(StaticDetail.Role_Admin) || User.IsInRole(StaticDetail.Role_Employee))
+                            {
+                                if (Model.OrderHeader.OrderStatus == StaticDetail.OrderStatus_Approved)
+                                {
+                                    <button type="submit" class="btn btn-primary form-control my-1">Start Processing</button>
+                                }
+                                if (Model.OrderHeader.OrderStatus == StaticDetail.OrderStatus_Processing)
+                                {
+                                    <button type="submit" class="btn btn-primary form-control my-1">Ship Order</button>
+                                }
+                                if (Model.OrderHeader.OrderStatus != StaticDetail.OrderStatus_Refunded &&
+                                Model.OrderHeader.OrderStatus != StaticDetail.OrderStatus_Cancelled &&
+                                Model.OrderHeader.OrderStatus != StaticDetail.OrderStatus_Shipped)
+                                {
+                                    <button type="submit" class="btn btn-danger form-control my-1">Cancel Order</button>
+                                }
+                            }
                         </div>
                     </div>
                 </div>

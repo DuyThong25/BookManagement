@@ -17,6 +17,9 @@ namespace BookManager.Utility
         public static string OrderStatus_Approved = "Approved";
         public static string OrderStatus_Processing = "Processing";
         public static string OrderStatus_Shipped = "Shipped";
+        public static string OrderStatus_Refunded = "Refunded";
+        public static string OrderStatus_Cancelled = "Cancelled";
+
 
         public static string PaymentStatus_Pending = "Pending";
         public static string PaymentStatus_Approved = "Approved";
