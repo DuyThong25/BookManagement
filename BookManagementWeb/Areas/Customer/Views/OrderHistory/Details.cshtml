@@ -146,7 +146,7 @@
                                             @if (Model.OrderHeader.OrderStatus == StaticDetail.OrderStatus_Pending || Model.OrderHeader.OrderStatus == StaticDetail.OrderStatus_Approved)
                                             {
                                                 <input asp-for="@Model.OrderHeader.Ward" type="text" class="form-control" />
-                                                <span asp-validation-for="@Model.OrderHeader.Name" class="text-danger"></span>
+                                                <span asp-validation-for="@Model.OrderHeader.Ward" class="text-danger"></span>
                                             }
                                             else
                                             {
@@ -157,7 +157,7 @@
                                             @if (Model.OrderHeader.OrderStatus != StaticDetail.OrderStatus_Shipped)
                                             {
                                                 <input asp-for="@Model.OrderHeader.Ward" type="text" class="form-control" />
-                                                <span asp-validation-for="@Model.OrderHeader.Name" class="text-danger"></span>
+                                                <span asp-validation-for="@Model.OrderHeader.Ward" class="text-danger"></span>
                                             }
                                             else
                                             {
@@ -335,7 +335,7 @@
                                 }
                                 else
                                 {
-                                    <button disabled tilte="In Process" class="btn btn-warning form-control my-1">
+                                    <button disabled title="In Process" class="btn btn-warning form-control my-1">
                                         Update Pickup Information
                                     </button>
                                 }
@@ -351,7 +351,7 @@
                                 }
                                 else
                                 {
-                                    <button disabled tilte="In Process" class="btn btn-warning form-control my-1">
+                                    <button disabled title="In Process" class="btn btn-warning form-control my-1">
                                         Update Pickup Information
                                     </button>
                                 }

@@ -10,6 +10,9 @@
 
 <form method="post">
     <input asp-for="@Model.OrderHeader.Id" hidden />
+    <input asp-for="@Model.OrderDetails" hidden />
+    <input asp-for="@Model.OrderHeader.ApplicationUserId" hidden />
+
     <br />
     <div class="container">
         <div class="card">
@@ -151,6 +154,42 @@
                                         </div>
                                     </div>
                                 </div>
+                                if (Model.OrderHeader.PaymentStatus == StaticDetail.PaymentStatus_ApprovedForDelayedPayment)
+                                {
+                                    <div class="shadow rounded rounded-2 p-3 ">
+                                        <p class="divider-text d-flex mt-3 opacity-50">
+                                            Shipping Information
+                                        </p>
+                                        <div class="row my-1">
+                                            <div class="col-3">Shipping Date</div>
+                                            <div class="col-9">
+                                                <input readonly asp-for="@Model.OrderHeader.ShippingDate" value="@formatShippingDate" type="datetime" class="form-control" />
+                                                <span asp-validation-for="@Model.OrderHeader.ShippingDate" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                        <div class="row my-1">
+                                            <div class="col-3">Carrier</div>
+                                            <div class="col-9">
+                                                @if (Model.OrderHeader.OrderStatus != StaticDetail.OrderStatus_Shipped)
+                                                {
+                                                    <input asp-for="@Model.OrderHeader.Carrier" id="Carrier" type="text" class="form-control" />
+                                                    <span asp-validation-for="@Model.OrderHeader.Carrier" class="text-danger"></span>
+                                                }
+                                                else
+                                                {
+                                                    <input readonly asp-for="@Model.OrderHeader.Carrier" id="Carrier" type="text" class="form-control" />
+                                                }
+                                            </div>
+                                        </div>
+                                        <div class="row my-1">
+                                            <div class="col-3">Tracking</div>
+                                            <div class="col-9">
+                                                <input readonly asp-for="@Model.OrderHeader.TrackingNumber" type="text" class="form-control" />
+                                                <span asp-validation-for="@Model.OrderHeader.TrackingNumber" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
                             }
                             else
                             {
@@ -162,21 +201,30 @@
                                     <div class="row my-1">
                                         <div class="col-3">Shipping Date</div>
                                         <div class="col-9">
-                                            <input asp-for="@Model.OrderHeader.ShippingDate" value="@formatShippingDate" type="datetime" readonly class="form-control" />
+                                            <input readonly asp-for="@Model.OrderHeader.ShippingDate" value="@formatShippingDate" type="datetime" class="form-control" />
                                             <span asp-validation-for="@Model.OrderHeader.ShippingDate" class="text-danger"></span>
                                         </div>
                                     </div>
+                                   
                                     <div class="row my-1">
                                         <div class="col-3">Carrier</div>
                                         <div class="col-9">
-                                            <input asp-for="@Model.OrderHeader.Carrier" type="text" class="form-control" />
-                                            <span asp-validation-for="@Model.OrderHeader.Carrier" class="text-danger"></span>
+                                            @if (Model.OrderHeader.OrderStatus != StaticDetail.OrderStatus_Shipped)
+                                            {
+                                                <input asp-for="@Model.OrderHeader.Carrier" id="Carrier" type="text" class="form-control" />
+                                                <span asp-validation-for="@Model.OrderHeader.Carrier" class="text-danger"></span>
+                                            }
+                                            else
+                                            {
+                                                <input readonly asp-for="@Model.OrderHeader.Carrier" id="Carrier" type="text" class="form-control" />
+                                            }
+                                         
                                         </div>
                                     </div>
                                     <div class="row my-1">
                                         <div class="col-3">Tracking</div>
                                         <div class="col-9">
-                                            <input asp-for="@Model.OrderHeader.TrackingNumber" type="text" class="form-control" />
+                                            <input readonly asp-for="@Model.OrderHeader.TrackingNumber" type="text" class="form-control" />
                                             <span asp-validation-for="@Model.OrderHeader.TrackingNumber" class="text-danger"></span>
                                         </div>
                                     </div>
@@ -217,7 +265,7 @@
                                 }
                                 else
                                 {
-                                    <button disabled tilte="In Process" class="btn btn-warning form-control my-1">
+                                    <button disabled title="In Process" class="btn btn-warning form-control my-1">
                                         Update Pickup Information
                                     </button>
                                 }
@@ -233,7 +281,7 @@
                                 }
                                 else
                                 {
-                                    <button disabled tilte="In Process" class="btn btn-warning form-control my-1">
+                                    <button disabled title="In Process" class="btn btn-warning form-control my-1">
                                         Update Pickup Information
                                     </button>
                                 }
@@ -295,17 +343,23 @@
                             {
                                 if (Model.OrderHeader.OrderStatus == StaticDetail.OrderStatus_Approved)
                                 {
-                                    <button type="submit" class="btn btn-primary form-control my-1">Start Processing</button>
+                                    <button type="submit" asp-action="StartProcessing" class="btn btn-primary form-control my-1">
+                                        Start Processing
+                                    </button>
                                 }
                                 if (Model.OrderHeader.OrderStatus == StaticDetail.OrderStatus_Processing)
                                 {
-                                    <button type="submit" class="btn btn-primary form-control my-1">Ship Order</button>
+                                    <button type="submit" onclick="return ValidateShipOrder()" asp-action="StartShipOrder" class="btn btn-primary form-control my-1">
+                                        Ship Order
+                                    </button>
                                 }
                                 if (Model.OrderHeader.OrderStatus != StaticDetail.OrderStatus_Refunded &&
                                 Model.OrderHeader.OrderStatus != StaticDetail.OrderStatus_Cancelled &&
                                 Model.OrderHeader.OrderStatus != StaticDetail.OrderStatus_Shipped)
                                 {
-                                    <button type="submit" class="btn btn-danger form-control my-1">Cancel Order</button>
+                                    <button type="submit" class="btn btn-danger form-control my-1">
+                                        Cancel Order
+                                    </button>
                                 }
                             }
                         </div>
@@ -318,5 +372,37 @@
 @section Scripts {
     @{
         <partial name="_ValidationScriptsPartial"></partial>
+        <script>
+            function ValidateShipOrder() {
+                // const today = new Date().toISOString().slice(0, 10);
+                // const shippingdate = document.getElementById('ShippingDate').value;
+
+                // if (document.getElementById('ShippingDate').value == "") {
+                //     Swal.fire({
+                //         icon: "error",
+                //         title: "Oops...",
+                //         text: "Please enter Shipping Date",
+                //     })
+                //     return false;
+                // }
+                // if (shippingdate < today) {
+                //     Swal.fire({
+                //         icon: "error",
+                //         title: "Oops...",
+                //         text: "Shipping date must be greater than today",
+                //     })
+                //     return false;
+                // }
+                if (document.getElementById('Carrier').value == "") {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Oops...",
+                        text: "Please enter Carrier",
+                    })
+                    return false;
+                }
+                return true;
+            }
+        </script>
     }
 }

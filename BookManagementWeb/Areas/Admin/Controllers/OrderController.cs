@@ -71,6 +71,53 @@ namespace BookManagementWeb.Areas.Admin.Controllers
             }
         }
 
+        [HttpPost]
+        public IActionResult StartProcessing()
+        {
+            try
+            {
+                _unitOfWork.OrderHeader.UpdateStatus(OrderVM.OrderHeader.Id, StaticDetail.OrderStatus_Processing);
+                _unitOfWork.Save();
+                TempData["Success"] = "Start Processing Successfully.";
+
+                return RedirectToAction(nameof(Details), new { orderId = OrderVM.OrderHeader.Id });
+
+            }
+            catch (Exception ex)
+            {
+                TempData["Success"] = "Something wrong...";
+                return RedirectToAction(nameof(Details), new { orderId = OrderVM.OrderHeader.Id });
+            }
+        }
+
+        [HttpPost]
+        public IActionResult StartShipOrder()
+        {
+            try
+            {
+                var orderHeaderFromDB = _unitOfWork.OrderHeader.Get(x => x.Id == OrderVM.OrderHeader.Id);
+                orderHeaderFromDB.Carrier = OrderVM.OrderHeader.Carrier;
+                orderHeaderFromDB.ShippingDate = DateTime.Now;
+                orderHeaderFromDB.TrackingNumber = Guid.NewGuid().ToString();
+                orderHeaderFromDB.OrderStatus = StaticDetail.OrderStatus_Shipped;
+                if (orderHeaderFromDB.PaymentStatus == StaticDetail.PaymentStatus_ApprovedForDelayedPayment)
+                {
+                    orderHeaderFromDB.PaymentDueDate = DateOnly.FromDateTime(DateTime.Now.AddDays(30));
+                }
+                _unitOfWork.OrderHeader.Update(orderHeaderFromDB);
+                _unitOfWork.Save();
+
+                TempData["Success"] = "Start Ship Order Successfully.";
+
+                return RedirectToAction(nameof(Details), new { orderId = OrderVM.OrderHeader.Id });
+            }
+            catch (Exception ex)
+            {
+                TempData["Success"] = "Something wrong...";
+                return RedirectToAction(nameof(Details), new { orderId = OrderVM.OrderHeader.Id });
+            }
+        }
+
         #region API Method
         [HttpGet("admin/order/statusorder/{status}")]
         public IActionResult StatusOrder(string status)
