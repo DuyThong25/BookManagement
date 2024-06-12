@@ -327,7 +327,9 @@
                             }
                             @if (User.IsInRole(StaticDetail.Role_Admin) || User.IsInRole(StaticDetail.Role_Employee))
                             {
-                                @if (Model.OrderHeader.OrderStatus != StaticDetail.OrderStatus_Shipped)
+                                if (Model.OrderHeader.OrderStatus != StaticDetail.OrderStatus_Shipped &&
+                                Model.OrderHeader.OrderStatus != StaticDetail.OrderStatus_Cancelled &&
+                                Model.OrderHeader.OrderStatus != StaticDetail.OrderStatus_Refunded)
                                 {
                                     <button type="submit" asp-action="UpdateOrderDetails" class="btn btn-warning form-control my-1">
                                         Update Pickup Information
@@ -404,10 +406,45 @@
                                     </div>
                                 </li>
                             </ul>
+                            <div>
+                                @if (Model.OrderHeader.OrderStatus == StaticDetail.OrderStatus_Cancelled)
+                                {
+                                    <p class="text-danger">
+                                        This Order is Cancelled
+                                    </p>
+                                }
+                                @if (Model.OrderHeader.OrderStatus == StaticDetail.OrderStatus_Refunded)
+                                {
+                                    <p class="text-danger">
+                                        This Order is Refunded
+                                    </p>
+                                }
+                            </div>
                             @if (Model.OrderHeader.OrderStatus == StaticDetail.OrderStatus_Shipped &&
                             Model.OrderHeader.PaymentStatus == StaticDetail.PaymentStatus_ApprovedForDelayedPayment)
                             {
                                 <button type="submit" class="btn btn-success form-control my-1">Pay Now </button>
+                            }
+                            @if (Model.OrderHeader.OrderStatus != StaticDetail.OrderStatus_Refunded &&
+                            Model.OrderHeader.OrderStatus != StaticDetail.OrderStatus_Cancelled &&
+                            Model.OrderHeader.OrderStatus != StaticDetail.OrderStatus_Shipped)
+                            {
+                                if (Model.OrderHeader.OrderStatus == StaticDetail.OrderStatus_Approved)
+                                {
+                                    <button type="submit" onclick="ConfirmCancelOrder(event, @Model.OrderHeader.Id)" class="btn btn-danger form-control my-1">
+                                        Refund Order
+                                    </button>
+                                }
+                                else
+                                {
+                                    // Customer chi co the huy don khi don chua qua trang thai Processing
+                                    if (Model.OrderHeader.OrderStatus == StaticDetail.OrderStatus_Pending)
+                                    {
+                                        <button type="submit" onclick="ConfirmCancelOrder(event, @Model.OrderHeader.Id)" class="btn btn-danger form-control my-1">
+                                            Cancel Order
+                                        </button>
+                                    }
+                                }
                             }
                         </div>
                     </div>
@@ -420,5 +457,31 @@
 @section Scripts {
     @{
         <partial name="_ValidationScriptsPartial"></partial>
+        <script>
+            function ConfirmCancelOrder(e, orderHeaderId) {
+                e.preventDefault();
+                Swal.fire({
+                    title: "Do you want to cancel order?",
+                    showDenyButton: true,
+                    confirmButtonText: "Save",
+                    denyButtonText: `Don't save`
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '/Admin/OrderHistory/CancelOrRefundOrder/' + orderHeaderId,
+                            type: 'POST',
+                            success: (data) => {
+                                window.location.reload();
+                            },
+                            error: (e) => {
+                                console.log(e);
+                            }
+                        });
+                    } else if (result.isDenied) {
+                        Swal.fire("Changes are not saved", "", "info");
+                    }
+                });
+            }
+        </script>
     }
 }

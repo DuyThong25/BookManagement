@@ -4,6 +4,7 @@ using BookManager.Models.ViewModel;
 using BookManager.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Stripe;
 using System.Security.Claims;
 
 namespace BookManagementWeb.Areas.Customer.Controllers
@@ -68,7 +69,39 @@ namespace BookManagementWeb.Areas.Customer.Controllers
                 return RedirectToAction(nameof(Details), new { orderId = orderHeaderFromDB.Id });
             }
         }
+
         #region API METHOD
+        [HttpPost("admin/orderhistory/CancelOrRefundOrder/{orderHeaderId}")]
+        public IActionResult CancelOrRefundOrder(int orderHeaderId)
+        {
+            var orderHeaderFromDB = _unitOfWork.OrderHeader.Get(x => x.Id == orderHeaderId);
+            if (orderHeaderFromDB.PaymentStatus == StaticDetail.PaymentStatus_Approved && orderHeaderFromDB.PaymentIntentId != null)
+            {
+                var options = new RefundCreateOptions
+                {
+                    Reason = RefundReasons.RequestedByCustomer,
+                    PaymentIntent = orderHeaderFromDB.PaymentIntentId,
+                };
+
+                var services = new RefundService();
+                Refund refund = services.Create(options);
+
+                orderHeaderFromDB.RefundOrderDate = DateTime.Now;
+
+                _unitOfWork.OrderHeader.UpdateStatus(orderHeaderFromDB.Id, StaticDetail.OrderStatus_Refunded);
+                TempData["Success"] = "Refund Order Successfully.";
+            }
+            else
+            {
+                orderHeaderFromDB.CancelOrderDate = DateTime.Now;
+
+                _unitOfWork.OrderHeader.UpdateStatus(orderHeaderFromDB.Id, StaticDetail.OrderStatus_Cancelled);
+                TempData["Success"] = "Cancel Order Successfully.";
+
+            }
+            _unitOfWork.Save();
+            return Json(new { orderId = orderHeaderId });
+        }
 
         [HttpGet("customer/orderhistory/statusorder/{status}")]
         public IActionResult StatusOrder(string status)
