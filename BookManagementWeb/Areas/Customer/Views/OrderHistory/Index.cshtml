@@ -1,0 +1,132 @@
+﻿@model List<OrderHeader>;
+@{
+    ViewData["Title"] = "Orders History";
+}
+
+<div class="container-fluid">
+    <div class="card shadow border-1 mt-4">
+        <div class="card-header bg-secondary bg-gradient  py-3">
+            <div class="row">
+                <div class="col-12 text-center text-white">
+                    <h2>Orders History</h2>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <div class="nav nav-tabs my-3" role="tablist">
+                    <a class="btn nav-link bg-primary text-white" onclick="filterStatus('all', this)">All</a>
+                    <a class="btn nav-link" onclick="filterStatus('approved', this)">Approved</a>
+                    <a class="btn nav-link" onclick="filterStatus('completed', this)">Completed</a>
+                    <a class="btn nav-link" onclick="filterStatus('inprocess', this)">In Process</a>
+                    <a class="btn nav-link" onclick="filterStatus('pending', this)">Pending</a>
+                </div>
+                <table id="myTable" class="table table-bordered table-striped w-100">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Order Date</th>
+                            <th>Name</th>
+                            <th>Phone Number</th>
+                            <th>Email</th>
+                            <th>Order Status</th>
+                            <th>Payment Status</th>
+                            <th>Total</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (OrderHeader item in Model)
+                        {
+                            <tr>
+                                <td>@item.Id</td>
+                                <td>@item.OrderDate?.ToString("dd-MMM-yyyy")</td>
+                                <td>@item.Name</td>
+                                <td>@item.PhoneNumber</td>
+                                <td>@item.ApplicationUser.Email</td>
+                                <td>@item.OrderStatus</td>
+                                <td>@item.PaymentStatus</td>
+                                <td>@item.OrderTotal.ToString("c")</td>
+                                <td class="text-center">
+                                    <div class="w-100 btn-group" role="group">
+                                        <a asp-controller="OrderHistory" asp-action="Details" asp-route-orderId="@item.Id" class="btn btn-primary mx-2">
+                                            <i class="bi bi-pencil-square"> Detail</i>
+                                        </a>
+                                        @* <a onclick="DeleteConfirm('/admin/product/delete/@item.ProductId', this)" class="btn btn-outline-danger mx-2">
+                                    <i class="bi bi-trash"> Delete</i>
+                                    </a> *@
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function filterStatus(status, element) {
+            const formatter = new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+            });
+            // Loại bỏ lớp 'active' khỏi tất cả các tab
+            var tabs = document.querySelectorAll('.nav-link');
+            tabs.forEach(function (tab) {
+                tab.classList.remove('bg-primary', 'text-white');
+            });
+
+            // Thêm lớp 'active' vào tab được chọn
+            element.classList.add('bg-primary', 'text-white');
+
+            $('#myTable').DataTable({
+                "bDestroy": true,
+                responsive: true,
+                ajax: {
+                    url: 'orderhistory/statusorder/' + status,
+                },
+                columns: [
+                    { data: 'id' },
+                    {
+                        data: 'orderDate',
+                        "render": function (data) {
+                            let date = new Date(data);
+                            let year = new Intl.DateTimeFormat('en', { year: 'numeric' }).format(date);
+                            let month = new Intl.DateTimeFormat('en', { month: 'short' }).format(date);
+                            let day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(date);
+                            return `${day}-${month}-${year}`
+                        }
+                    },
+                    { data: 'name' },
+                    { data: 'phoneNumber' },
+                    { data: 'applicationUser.email' },
+                    { data: 'orderStatus' },
+                    { data: 'paymentStatus' },
+                    {
+                        data: 'orderTotal',
+                        "render": function (data) {
+                            return `${formatter.format(data)}`
+                        }
+                    },
+                    {
+                        data: 'id',
+                        "render": function (data) {
+                            return ` <div class="w-100 btn-group" role="group">
+                                                        <a href="/Customer/OrderHistory/Details?orderId=${data}" class="btn btn-primary mx-2">
+                                                            <i class="bi bi-pencil-square"> Detail</i>
+                                                        </a>
+        @* <a onclick="DeleteConfirm('/admin/product/delete/@item.ProductId', this)" class="btn btn-outline-danger mx-2">
+                                                    <i class="bi bi-trash"> Delete</i>
+                                                </a> *@
+                                                    </div>`
+                        }
+                    }
+                ]
+            });
+        }
+    </script>
+}

@@ -12,8 +12,7 @@ using System.Collections.Generic;
 namespace BookManagementWeb.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = StaticDetail.Role_Admin)]
-
+    [Authorize(Roles = StaticDetail.Role_Admin + "," + StaticDetail.Role_Employee)]
     public class ProductController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -133,7 +132,7 @@ namespace BookManagementWeb.Areas.Admin.Controllers
                 _unitOfWork.Product.Remove(product);
                 _unitOfWork.Save();
                 HandleDeleteFileImage(product, wwwRootPath);
-                return Json(new { success = true, messag = "Delete Succesful" });
+                return Json(new { success = true, message = "Delete Succesful" });
             }
             else
             {
