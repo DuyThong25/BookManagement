@@ -1,6 +1,7 @@
 using BookManager.DataAccess.Data;
 using BookManager.DataAccess.Repository.IRepository;
 using BookManager.Models;
+using BookManager.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
@@ -22,6 +23,13 @@ namespace BookManagementWeb.Areas.Customer.Controllers
 
         public IActionResult Index()
         {
+            //Create a Session
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId != null)
+            {
+                HttpContext.Session.SetInt32(StaticDetail.SessionCart,
+                    _unitOfWork.ShoppingCart.GetAll(x => x.ApplicationUserId == userId).Count());
+            }
             IEnumerable<Product> productList = _unitOfWork.Product.GetAll(includeProperties: "Category");
             return View(productList);
         }
@@ -44,21 +52,31 @@ namespace BookManagementWeb.Areas.Customer.Controllers
             var claimsIdentity = User.Identity as ClaimsIdentity;
             var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
             shoppingCart.ApplicationUserId = userId;
-            
+
             ShoppingCart cartFromDB = _unitOfWork.ShoppingCart.Get(x => x.ApplicationUserId == userId && x.ProductId == shoppingCart.ProductId);
 
-            if(cartFromDB != null)  
+            if (cartFromDB != null)
             {
                 // Product already exsit in cart of user
                 cartFromDB.Count += shoppingCart.Count;
                 _unitOfWork.ShoppingCart.Update(cartFromDB);
-            }else
+                _unitOfWork.Save();
+
+                //update Session count cart
+                HttpContext.Session.SetInt32(StaticDetail.SessionCart,
+                    _unitOfWork.ShoppingCart.GetAll(x => x.ApplicationUserId == userId).Count());
+            }
+            else
             {
                 // Ading new product 
                 _unitOfWork.ShoppingCart.Add(shoppingCart);
+                _unitOfWork.Save();
+
+                //update Session count cart
+                HttpContext.Session.SetInt32(StaticDetail.SessionCart,
+                    _unitOfWork.ShoppingCart.GetAll(x => x.ApplicationUserId == userId).Count());
             }
 
-            _unitOfWork.Save();
             TempData["success"] = "Cart update succesfully";
 
             return RedirectToAction(nameof(Index));

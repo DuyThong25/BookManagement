@@ -280,7 +280,7 @@ namespace BookManagementWeb.Areas.Customer.Controllers
                 {
                     // Remove cart
                     orderTotal = GetOrderTotalAPI(cartFromDb, isDelete: true);
-                    _unitOfWork.ShoppingCart.Remove(cartFromDb);
+                    _unitOfWork.ShoppingCart.Remove(cartFromDb);          
                     _unitOfWork.Save();
                     return Json(new { cart = cartFromDb, total = orderTotal });
                 }
@@ -303,6 +303,9 @@ namespace BookManagementWeb.Areas.Customer.Controllers
             {
                 double orderTotal = GetOrderTotalAPI(cartFromDb, isDelete: true);
                 _unitOfWork.ShoppingCart.Remove(cartFromDb);
+                //Update Session
+                HttpContext.Session.SetInt32(StaticDetail.SessionCart,
+                    _unitOfWork.ShoppingCart.GetAll(x => x.ApplicationUserId == cartFromDb.ApplicationUserId).Count() - 1);
                 _unitOfWork.Save();
                 return Json(new { cart = cartFromDb, total = orderTotal });
             }
