@@ -25,14 +25,14 @@
             </div>
             <div class="card-body">
                 <div class="container rounded p-2">
-                    <div class="text-dark text-opacity-50 px-3">
+                    <div class="text-dark text-opacity-50 ">
                         <a asp-action="Index" class="btn btn-outline-dark">
                             <i class="bi bi-caret-left"></i> Back to Orders
                         </a>
                     </div>
                     <div class="row">
                         <div class="col-12 col-lg-6 pb-4">
-                            <div class="shadow rounded rounded-2 p-3 ">
+                            <div class="shadow rounded rounded-2 p-3 my-3">
                                 <div class="row">
                                     <h4 class="d-flex justify-content-between align-items-center ">
                                         <p class="text-primary fw-bold">Pickup Information:</p>
@@ -142,7 +142,7 @@
                             </div>
                             @if (Model.OrderHeader.SessionId == null)
                             {
-                                <div class="p-3">
+                                <div class="p-3 my-3">
                                     <p class="divider-text d-flex mt-3 opacity-50">
                                         Payment Information
                                     </p>
@@ -156,7 +156,7 @@
                                 </div>
                                 if (Model.OrderHeader.PaymentStatus == StaticDetail.PaymentStatus_ApprovedForDelayedPayment)
                                 {
-                                    <div class="shadow rounded rounded-2 p-3 ">
+                                    <div class="shadow rounded rounded-2 p-3 my-3">
                                         <p class="divider-text d-flex mt-3 opacity-50">
                                             Shipping Information
                                         </p>
@@ -194,7 +194,7 @@
                             else
                             {
 
-                                <div class="shadow rounded rounded-2 p-3 ">
+                                <div class="shadow rounded rounded-2 p-3 my-3">
                                     <p class="divider-text d-flex mt-3 opacity-50">
                                         Shipping Information
                                     </p>
@@ -229,7 +229,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="shadow rounded rounded-2 p-3">
+                                <div class="shadow rounded rounded-2 p-3 my-3">
                                     <p class="divider-text d-flex mt-3 opacity-50">
                                         Payment Information
                                     </p>
@@ -289,7 +289,7 @@
                                 }
                             }
                         </div>
-                        <div class="col-12 col-lg-5 offset-lg-1 shadow rounded rounded-2 p-3">
+                        <div class="col-12 col-lg-5 offset-lg-1 shadow rounded rounded-2 p-3 mt-3">
                             <h4 class="d-flex justify-content-between align-items-center">
                                 <p class="text-primary fw-bold">Order Details</p>
                             </h4>
@@ -340,13 +340,13 @@
                                 @if (Model.OrderHeader.OrderStatus == StaticDetail.OrderStatus_Cancelled)
                                 {
                                     <p class="text-danger">
-                                        * This Order is Cancelled
+                                        * This order is Cancelled on @Model.OrderHeader.CancelOrderDate?.ToString("dd-MM-yyyy HH:mm:ss")
                                     </p>
                                 }
                                 @if (Model.OrderHeader.OrderStatus == StaticDetail.OrderStatus_Refunded)
                                 {
                                     <p class="text-danger">
-                                        * This Order is Refunded
+                                        * This order is Refunded on @Model.OrderHeader.RefundOrderDate?.ToString("dd-MM-yyyy HH:mm:ss")
                                     </p>
                                 }
                             </div>

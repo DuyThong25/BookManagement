@@ -269,23 +269,7 @@
                                     <div class="row my-1">
                                         <div class="col-3">Carrier</div>
                                         <div class="col-9">
-                                            @if (User.IsInRole(StaticDetail.Role_Customer) || User.IsInRole(StaticDetail.Role_Company))
-                                            {
-                                                <input readonly asp-for="@Model.OrderHeader.Carrier" type="text" class="form-control" />
-                                            }
-                                            else
-                                            {
-                                                @if (Model.OrderHeader.OrderStatus != StaticDetail.OrderStatus_Shipped)
-                                                {
-                                                    <input asp-for="@Model.OrderHeader.Carrier" type="text" class="form-control" />
-                                                    <span asp-validation-for="@Model.OrderHeader.Carrier" class="text-danger"></span>
-                                                }
-                                                else
-                                                {
-                                                    <input readonly asp-for="@Model.OrderHeader.Carrier" type="text" class="form-control" />
-                                                }
-                                            }
-
+                                            <input readonly asp-for="@Model.OrderHeader.Carrier" type="text" class="form-control" />
                                         </div>
                                     </div>
                                     <div class="row my-1">
