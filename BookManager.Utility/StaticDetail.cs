@@ -25,7 +25,7 @@ namespace BookManager.Utility
         public static string PaymentStatus_Approved = "Approved";
         public static string PaymentStatus_ApprovedForDelayedPayment = "ApprovedForDelayedPayment";
 
-
+        public static string SessionCart = "SessionShoppingCart";
 
         //VND format
         public static string VndCurrency()
