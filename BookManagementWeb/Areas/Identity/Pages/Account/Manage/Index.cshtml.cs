@@ -64,7 +64,6 @@ namespace BookManagementWeb.Areas.Identity.Pages.Account.Manage
             [Required]
             [Display(Name = "Full name")]
             public string Name { get; set; }
-            [Required]
             [Display(Name = "Date of Birth")]
             public DateTime? BirthDay { get; set; }
 

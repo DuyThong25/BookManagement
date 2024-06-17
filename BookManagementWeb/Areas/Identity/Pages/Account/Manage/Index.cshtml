@@ -39,7 +39,14 @@
                 <div class="col-6">
                     <div class="form-floating mb-3">
                         <input asp-for="Input.BirthDay" class="form-control" placeholder="Please enter your birthDay." type="date" />
-                        <label asp-for="Input.BirthDay" class="form-label"></label>
+                        @if (User.IsInRole(StaticDetail.Role_Company))
+                        {
+                            <label asp-for="Input.BirthDay" class="form-label">Founding date</label>
+                        }
+                        else
+                        {
+                            <label asp-for="Input.BirthDay" class="form-label"></label>
+                        }
                         <span asp-validation-for="Input.BirthDay" class="text-danger"></span>
 
                     </div>

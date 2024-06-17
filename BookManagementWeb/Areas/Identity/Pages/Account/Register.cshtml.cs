@@ -116,8 +116,7 @@ namespace BookManagementWeb.Areas.Identity.Pages.Account
             public IEnumerable<SelectListItem> RoleList { get; set; }
 
             [Display(Name = "Date of Birth")]
-            [Required]
-            public DateTime BirthDay { get; set; }
+            public DateTime? BirthDay { get; set; }
 
             public int? CompanyId { get; set; }
             [ValidateNever]
@@ -157,11 +156,14 @@ namespace BookManagementWeb.Areas.Identity.Pages.Account
         {
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-            if ((DateTime.Now.Year - DateTime.Parse(Input.BirthDay.ToString()).Year) < 12)
+            if (!User.IsInRole(StaticDetail.Role_Admin) && !User.IsInRole(StaticDetail.Role_Employee))
             {
-                ModelState.AddModelError("Input.BirthDay", "Must be 12+ years old");
+                if ((DateTime.Now.Year - DateTime.Parse(Input.BirthDay.ToString()).Year) < 12)
+                {
+                    ModelState.AddModelError("Input.BirthDay", "Must be 12+ years old");
+                }
             }
-            if(Input.Role == StaticDetail.Role_Company && String.IsNullOrEmpty(Input.CompanyId.ToString()))
+            if (Input.Role == StaticDetail.Role_Company && String.IsNullOrEmpty(Input.CompanyId.ToString()))
             {
                 ModelState.AddModelError("Input.CompanyId", "The Company field is required.");
             }
@@ -173,7 +175,7 @@ namespace BookManagementWeb.Areas.Identity.Pages.Account
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
                 user.BirthDay = Input.BirthDay;
-                if(Input.Role == StaticDetail.Role_Company)
+                if (Input.Role == StaticDetail.Role_Company)
                 {
                     user.CompanyID = Input.CompanyId;
                 }
@@ -209,7 +211,14 @@ namespace BookManagementWeb.Areas.Identity.Pages.Account
                     }
                     else
                     {
-                        await _signInManager.SignInAsync(user, isPersistent: false);
+                        if (User.IsInRole(StaticDetail.Role_Admin) || User.IsInRole(StaticDetail.Role_Employee))
+                        {
+                            TempData["success"] = "Register succesfully!!";
+                        }
+                        else
+                        {
+                            await _signInManager.SignInAsync(user, isPersistent: false);
+                        }
                         return LocalRedirect(returnUrl);
                     }
                 }
