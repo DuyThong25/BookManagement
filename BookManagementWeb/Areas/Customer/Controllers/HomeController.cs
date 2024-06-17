@@ -23,13 +23,6 @@ namespace BookManagementWeb.Areas.Customer.Controllers
 
         public IActionResult Index()
         {
-            //Create a Session
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId != null)
-            {
-                HttpContext.Session.SetInt32(StaticDetail.SessionCart,
-                    _unitOfWork.ShoppingCart.GetAll(x => x.ApplicationUserId == userId).Count());
-            }
             IEnumerable<Product> productList = _unitOfWork.Product.GetAll(includeProperties: "Category");
             return View(productList);
         }
