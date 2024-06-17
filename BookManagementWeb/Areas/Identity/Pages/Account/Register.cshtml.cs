@@ -114,6 +114,7 @@ namespace BookManagementWeb.Areas.Identity.Pages.Account
             public string? Role { get; set; }
             [ValidateNever]
             public IEnumerable<SelectListItem> RoleList { get; set; }
+
             [Display(Name = "Date of Birth")]
             [Required]
             public DateTime BirthDay { get; set; }
