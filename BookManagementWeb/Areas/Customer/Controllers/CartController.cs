@@ -204,6 +204,8 @@ namespace BookManagementWeb.Areas.Customer.Controllers
                 .GetAll(x => x.ApplicationUserId == orderHeaderFromDB.ApplicationUserId).ToList();
             _unitOfWork.ShoppingCart.RemoveRange(shoppingCarts);
             _unitOfWork.Save();
+            //Clear session
+            HttpContext.Session.Remove(StaticDetail.SessionCart);
             return View(orderHeaderFromDB);
         }
 
