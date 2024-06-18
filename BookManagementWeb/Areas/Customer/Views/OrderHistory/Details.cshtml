@@ -29,7 +29,7 @@
                     </div>
                     <div class="row">
                         <div class="col-12 col-lg-6 pb-4">
-                            <div class="shadow rounded rounded-2 p-3 ">
+                            <div class="shadow rounded rounded-2 p-3 my-3">
                                 <div class="row">
                                     <h4 class="d-flex justify-content-between align-items-center ">
                                         <p class="text-primary fw-bold">Pickup Information:</p>
@@ -226,7 +226,7 @@
                             </div>
                             @if (Model.OrderHeader.SessionId == null)
                             {
-                                <div class="p-3">
+                                <div class="shadow rounded rounded-2 p-3 my-3">
                                     <p class="divider-text d-flex mt-3 opacity-50">
                                         Payment Information
                                     </p>
@@ -255,7 +255,7 @@
                             }
                             else
                             {
-                                <div class="shadow rounded rounded-2 p-3 ">
+                                <div class="shadow rounded rounded-2 p-3 my-3">
                                     <p class="divider-text d-flex mt-3 opacity-50">
                                         Shipping Information
                                     </p>
@@ -280,7 +280,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="shadow rounded rounded-2 p-3">
+                                <div class="shadow rounded rounded-2 p-3 my-3">
                                     <p class="divider-text d-flex mt-3 opacity-50">
                                         Payment Information
                                     </p>
@@ -343,7 +343,7 @@
                                 }
                             }
                         </div>
-                        <div class="col-12 col-lg-5 offset-lg-1 shadow rounded rounded-2 p-3">
+                        <div class="col-12 col-lg-5 offset-lg-1 shadow rounded rounded-2 p-3 my-3">
                             <h4 class="d-flex justify-content-between align-items-center">
                                 <p class="text-primary fw-bold">Order Details</p>
                             </h4>
@@ -394,13 +394,13 @@
                                 @if (Model.OrderHeader.OrderStatus == StaticDetail.OrderStatus_Cancelled)
                                 {
                                     <p class="text-danger">
-                                        This Order is Cancelled
+                                        * This order is Cancelled on @Model.OrderHeader.CancelOrderDate?.ToString("dd-MM-yyyy HH:mm:ss")
                                     </p>
                                 }
                                 @if (Model.OrderHeader.OrderStatus == StaticDetail.OrderStatus_Refunded)
                                 {
                                     <p class="text-danger">
-                                        This Order is Refunded
+                                        * This order is Refunded on @Model.OrderHeader.RefundOrderDate?.ToString("dd-MM-yyyy HH:mm:ss")
                                     </p>
                                 }
                             </div>
@@ -408,12 +408,16 @@
                             Model.OrderHeader.PaymentStatus == StaticDetail.PaymentStatus_ApprovedForDelayedPayment)
                             {
                                 <button type="submit" class="btn btn-success form-control my-1">Pay Now </button>
+                                <span class="text-danger">
+                                    * The company must pay this order within 30 days
+                                </span>
                             }
                             @if (Model.OrderHeader.OrderStatus != StaticDetail.OrderStatus_Refunded &&
                             Model.OrderHeader.OrderStatus != StaticDetail.OrderStatus_Cancelled &&
                             Model.OrderHeader.OrderStatus != StaticDetail.OrderStatus_Shipped)
                             {
-                                if (Model.OrderHeader.OrderStatus == StaticDetail.OrderStatus_Approved)
+                                if (Model.OrderHeader.OrderStatus == StaticDetail.OrderStatus_Approved
+                                && Model.OrderHeader.PaymentStatus != StaticDetail.PaymentStatus_ApprovedForDelayedPayment)
                                 {
                                     <button type="submit" onclick="ConfirmCancelOrder(event, @Model.OrderHeader.Id)" class="btn btn-danger form-control my-1">
                                         Refund Order
@@ -422,7 +426,8 @@
                                 else
                                 {
                                     // Customer chi co the huy don khi don chua qua trang thai Processing
-                                    if (Model.OrderHeader.OrderStatus == StaticDetail.OrderStatus_Pending)
+                                    if (Model.OrderHeader.OrderStatus == StaticDetail.OrderStatus_Pending
+                                    || Model.OrderHeader.PaymentStatus == StaticDetail.PaymentStatus_ApprovedForDelayedPayment)
                                     {
                                         <button type="submit" onclick="ConfirmCancelOrder(event, @Model.OrderHeader.Id)" class="btn btn-danger form-control my-1">
                                             Cancel Order

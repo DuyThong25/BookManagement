@@ -58,13 +58,28 @@ namespace BookManagementWeb.Areas.Customer.Controllers
                     cart.Price = GetBasePrice(cart);
                     ShoppingCartVM.OrderHeader.OrderTotal += (cart.Price * cart.Count);
                 }
+                if (ShoppingCartVM.OrderHeader.ApplicationUser.CompanyID.GetValueOrDefault() == 0)
+                {
+                    //Normal Customer
+                    ShoppingCartVM.OrderHeader.Name = ShoppingCartVM.OrderHeader.ApplicationUser.Name;
+                    ShoppingCartVM.OrderHeader.Address = ShoppingCartVM.OrderHeader.ApplicationUser.Address;
+                    ShoppingCartVM.OrderHeader.Ward = ShoppingCartVM.OrderHeader.ApplicationUser.Ward;
+                    ShoppingCartVM.OrderHeader.District = ShoppingCartVM.OrderHeader.ApplicationUser.District;
+                    ShoppingCartVM.OrderHeader.City = ShoppingCartVM.OrderHeader.ApplicationUser.City;
+                    ShoppingCartVM.OrderHeader.PhoneNumber = ShoppingCartVM.OrderHeader.ApplicationUser.PhoneNumber;
+                }
+                else
+                {
+                    //Company customer
+                    var companyFromDB = _unitOfWork.Company.Get(x => x.Id == ShoppingCartVM.OrderHeader.ApplicationUser.CompanyID);
+                    ShoppingCartVM.OrderHeader.Name = companyFromDB.Name;
+                    ShoppingCartVM.OrderHeader.Address = companyFromDB.Address;
+                    ShoppingCartVM.OrderHeader.Ward = companyFromDB.Ward;
+                    ShoppingCartVM.OrderHeader.District = companyFromDB.District;
+                    ShoppingCartVM.OrderHeader.City = companyFromDB.City;
+                    ShoppingCartVM.OrderHeader.PhoneNumber = companyFromDB.PhoneNumber;
+                }
 
-                ShoppingCartVM.OrderHeader.Name = ShoppingCartVM.OrderHeader.ApplicationUser.Name;
-                ShoppingCartVM.OrderHeader.Address = ShoppingCartVM.OrderHeader.ApplicationUser.Address;
-                ShoppingCartVM.OrderHeader.Ward = ShoppingCartVM.OrderHeader.ApplicationUser.Ward;
-                ShoppingCartVM.OrderHeader.District = ShoppingCartVM.OrderHeader.ApplicationUser.District;
-                ShoppingCartVM.OrderHeader.City = ShoppingCartVM.OrderHeader.ApplicationUser.City;
-                ShoppingCartVM.OrderHeader.PhoneNumber = ShoppingCartVM.OrderHeader.ApplicationUser.PhoneNumber;
                 return View(ShoppingCartVM);
             }
             else
@@ -171,7 +186,7 @@ namespace BookManagementWeb.Areas.Customer.Controllers
             var orderHeaderFromDB = _unitOfWork.OrderHeader.Get(u => u.Id == id, includeProperties: "ApplicationUser");
             if (orderHeaderFromDB != null)
             {
-                if (orderHeaderFromDB.PaymentStatus != StaticDetail.PaymentStatus_ApprovedForDelayedPayment)
+                if (!String.IsNullOrEmpty(orderHeaderFromDB.SessionId))
                 {
                     var service = new SessionService();
                     Session session = service.Get(orderHeaderFromDB.SessionId);
@@ -180,16 +195,16 @@ namespace BookManagementWeb.Areas.Customer.Controllers
                         _unitOfWork.OrderHeader.UpdateStripePaymentID(id, session.Id, session.PaymentIntentId);
                         _unitOfWork.OrderHeader.UpdateStatus(id, StaticDetail.OrderStatus_Approved, StaticDetail.PaymentStatus_Approved);
                         _unitOfWork.Save();
-
-                        //Clear cart
-                        List<ShoppingCart> shoppingCarts = _unitOfWork.ShoppingCart
-                            .GetAll(x => x.ApplicationUserId == orderHeaderFromDB.ApplicationUserId).ToList();
-                        _unitOfWork.ShoppingCart.RemoveRange(shoppingCarts);
-                        _unitOfWork.Save();
                     }
                 }
             }
-            return View(id);
+
+            //Clear cart
+            List<ShoppingCart> shoppingCarts = _unitOfWork.ShoppingCart
+                .GetAll(x => x.ApplicationUserId == orderHeaderFromDB.ApplicationUserId).ToList();
+            _unitOfWork.ShoppingCart.RemoveRange(shoppingCarts);
+            _unitOfWork.Save();
+            return View(orderHeaderFromDB);
         }
 
         private double GetBasePrice(ShoppingCart shoppingCart)
@@ -280,7 +295,7 @@ namespace BookManagementWeb.Areas.Customer.Controllers
                 {
                     // Remove cart
                     orderTotal = GetOrderTotalAPI(cartFromDb, isDelete: true);
-                    _unitOfWork.ShoppingCart.Remove(cartFromDb);          
+                    _unitOfWork.ShoppingCart.Remove(cartFromDb);
                     _unitOfWork.Save();
                     return Json(new { cart = cartFromDb, total = orderTotal });
                 }

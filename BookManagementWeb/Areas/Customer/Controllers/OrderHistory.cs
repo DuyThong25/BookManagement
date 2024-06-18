@@ -5,6 +5,8 @@ using BookManager.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Stripe;
+using Stripe.Checkout;
+using Stripe.Climate;
 using System.Security.Claims;
 
 namespace BookManagementWeb.Areas.Customer.Controllers
@@ -33,6 +35,47 @@ namespace BookManagementWeb.Areas.Customer.Controllers
                 OrderDetails = _unitOfWork.OrderDetail.GetAll(x => x.OrderHeaderId == orderId, includeProperties: "Product").ToList()
             };
             return View(OrderVM);
+        }
+        [HttpPost]
+        [ActionName("Details")]
+        public IActionResult DetailPOST()
+        {
+            var orederDetailFromDB = _unitOfWork.OrderDetail.GetAll(x => x.OrderHeaderId == OrderVM.OrderHeader.Id, includeProperties: "Product").ToList();
+            var domain = "https://localhost:7121/";
+            var options = new Stripe.Checkout.SessionCreateOptions
+            {
+                SuccessUrl = domain + $"customer/cart/OrderConfirmation?id={OrderVM.OrderHeader.Id}",
+                CancelUrl = domain + "customer/cart/index",
+                LineItems = new List<Stripe.Checkout.SessionLineItemOptions>(),
+                Mode = "payment",
+            };
+            // configure san pham trong gio hang
+            foreach (var cart in orederDetailFromDB)
+            {
+                var sessionLineItem = new SessionLineItemOptions
+                {
+                    PriceData = new SessionLineItemPriceDataOptions
+                    {
+                        UnitAmount = (long)(cart.Price * 100), // $20.5 => 2500
+                        Currency = "usd",
+                        ProductData = new SessionLineItemPriceDataProductDataOptions
+                        {
+                            Name = cart.Product.Title,
+                        }
+                    },
+                    Quantity = cart.Count
+                };
+                options.LineItems.Add(sessionLineItem);
+            }
+
+            var service = new Stripe.Checkout.SessionService();
+            Session session = service.Create(options);
+            _unitOfWork.OrderHeader.UpdateStripePaymentID(OrderVM.OrderHeader.Id, session.Id, session.PaymentIntentId); // PaymentIntentId = null vì chua hoan tat thanh toan
+            _unitOfWork.Save();
+
+            // Chuyen den trang checkout
+            Response.Headers.Add("Location", session.Url);
+            return new StatusCodeResult(303);
         }
 
         [HttpPost]
