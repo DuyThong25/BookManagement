@@ -6,6 +6,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using BookManager.DataAccess.Repository.IRepository;
 using BookManager.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -18,13 +19,15 @@ namespace BookManagementWeb.Areas.Identity.Pages.Account.Manage
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
-
+        private readonly IUnitOfWork _unitOfWork;
         public IndexModel(
             UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager)
+            SignInManager<IdentityUser> signInManager,
+            IUnitOfWork unitOfWork)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _unitOfWork = unitOfWork;
         }
 
         /// <summary>
@@ -85,16 +88,34 @@ namespace BookManagementWeb.Areas.Identity.Pages.Account.Manage
             var phoneNumber = applicationUser.PhoneNumber;
 
             Username = userName;
-            Input = new InputModel
+            if (applicationUser.CompanyID == null)
             {
-                PhoneNumber = phoneNumber,
-                Name = applicationUser.Name,
-                Address = applicationUser.Address,
-                Ward = applicationUser.Ward,
-                District = applicationUser.District,
-                City = applicationUser.City,
-                BirthDay = applicationUser.BirthDay,
-            };
+                // Normal customer
+                Input = new InputModel
+                {
+                    PhoneNumber = phoneNumber,
+                    Name = applicationUser.Name,
+                    Address = applicationUser.Address,
+                    Ward = applicationUser.Ward,
+                    District = applicationUser.District,
+                    City = applicationUser.City,
+                    BirthDay = applicationUser.BirthDay,
+                };
+            }else
+            {
+                //Company customer
+                var companyFromDB = _unitOfWork.Company.Get(x => x.Id == applicationUser.CompanyID);
+                Input = new InputModel
+                {
+                    PhoneNumber = companyFromDB.PhoneNumber,
+                    Name = companyFromDB.Name,
+                    Address = companyFromDB.Address,
+                    Ward = companyFromDB.Ward,
+                    District = companyFromDB.District,
+                    City = companyFromDB.City,
+                    BirthDay = applicationUser.BirthDay,
+                };
+            }
         }
 
         public async Task<IActionResult> OnGetAsync()
@@ -164,14 +185,14 @@ namespace BookManagementWeb.Areas.Identity.Pages.Account.Manage
 
             if (Input.BirthDay != user.BirthDay)
             {
-                if ((DateTime.Now.Year - DateTime.Parse(Input.BirthDay.ToString()).Year ) < 12 )
+                if ((DateTime.Now.Year - DateTime.Parse(Input.BirthDay.ToString()).Year) < 12)
                 {
                     ModelState.AddModelError("Input.BirthDay", "Must be 12+ years old");
                     return Page();
                 }
                 else
                 {
-                    user.BirthDay = Input.BirthDay;  
+                    user.BirthDay = Input.BirthDay;
                 }
             }
             try
