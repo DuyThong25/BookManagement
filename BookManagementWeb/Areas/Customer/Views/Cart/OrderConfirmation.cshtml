@@ -1,14 +1,35 @@
-﻿@model int
+﻿@model OrderHeader
 @{
     ViewData["title"] = "Order Confirmation";
 }
-
 <div class="container">
     <div class="row">
         <div class="col-md-12">
-            <h3 class="text-success">Order Placed Successfully !!</h3>
-            <h6>Your Order Number is: @Model</h6>
+            @if (Model.ApplicationUser.CompanyID.GetValueOrDefault() == 0)
+            {
+            // Normal Customer
+                <h3 class="text-success">Order Placed Successfully !!</h3>
+                <h6>Your Order Number is: @Model.Id</h6>
+            }
+            else
+            {
+                // Company Customer
+                if (Model.PaymentStatus != StaticDetail.PaymentStatus_Approved)
+                {
+                    <h6>Your Order Number is: @Model.Id</h6>
+                    <h3 class="text-info">
+                        Please wait for packaging..
+                    </h3>
+                }
+                else
+                {
+                    <h6>Your Order Number is: @Model.Id</h6>
+                    <h3 class="text-success">
+                        Your Company has successfully paid.
+                    </h3>
+                }
+            }
         </div>
-
     </div>
 </div>
+

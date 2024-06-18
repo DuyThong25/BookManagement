@@ -37,7 +37,14 @@
                                     <label>Name</label>
                                 </div>
                                 <div class="col-9">
-                                    <input asp-for="OrderHeader.Name" class="form-control" />
+                                    @if (!User.IsInRole(StaticDetail.Role_Company))
+                                    {
+                                        <input asp-for="OrderHeader.Name" class="form-control" />
+                                    }
+                                    else
+                                    {
+                                        <input asp-for="OrderHeader.Name" class="form-control" readonly />
+                                    }
                                     <span asp-validation-for="OrderHeader.Name" class="text-danger"></span>
                                 </div>
                             </div>
@@ -46,7 +53,14 @@
                                     <label>Phone</label>
                                 </div>
                                 <div class="col-9">
-                                    <input asp-for="OrderHeader.PhoneNumber" class="form-control" />
+                                    @if (!User.IsInRole(StaticDetail.Role_Company))
+                                    {
+                                        <input asp-for="OrderHeader.PhoneNumber" class="form-control" />
+                                    }
+                                    else
+                                    {
+                                        <input asp-for="OrderHeader.PhoneNumber" class="form-control" readonly />
+                                    }
                                     <span asp-validation-for="OrderHeader.PhoneNumber" class="text-danger"></span>
                                 </div>
                             </div>
@@ -55,7 +69,14 @@
                                     <label>Street Address</label>
                                 </div>
                                 <div class="col-9">
-                                    <input asp-for="OrderHeader.Address" class="form-control" />
+                                    @if (!User.IsInRole(StaticDetail.Role_Company))
+                                    {
+                                        <input asp-for="OrderHeader.Address" class="form-control" />
+                                    }
+                                    else
+                                    {
+                                        <input asp-for="OrderHeader.Address" class="form-control" readonly />
+                                    }
                                     <span asp-validation-for="OrderHeader.Address" class="text-danger"></span>
                                 </div>
                             </div>
@@ -64,7 +85,14 @@
                                     <label>Ward</label>
                                 </div>
                                 <div class="col-9">
-                                    <input asp-for="OrderHeader.Ward" class="form-control" />
+                                    @if (!User.IsInRole(StaticDetail.Role_Company))
+                                    {
+                                        <input asp-for="OrderHeader.Ward" class="form-control" />
+                                    }
+                                    else
+                                    {
+                                        <input asp-for="OrderHeader.Ward" class="form-control" readonly />
+                                    }
                                     <span asp-validation-for="OrderHeader.Ward" class="text-danger"></span>
                                 </div>
                             </div>
@@ -73,7 +101,14 @@
                                     <label>District</label>
                                 </div>
                                 <div class="col-9">
-                                    <input asp-for="OrderHeader.District" class="form-control" />
+                                    @if (!User.IsInRole(StaticDetail.Role_Company))
+                                    {
+                                        <input asp-for="OrderHeader.District" class="form-control" />
+                                    }
+                                    else
+                                    {
+                                        <input asp-for="OrderHeader.District" class="form-control" readonly />
+                                    }
                                     <span asp-validation-for="OrderHeader.District" class="text-danger"></span>
                                 </div>
                             </div>
@@ -82,7 +117,14 @@
                                     <label>City</label>
                                 </div>
                                 <div class="col-9">
-                                    <input asp-for="OrderHeader.City" class="form-control" />
+                                    @if (!User.IsInRole(StaticDetail.Role_Company))
+                                    {
+                                        <input asp-for="OrderHeader.City" class="form-control" />
+                                    }
+                                    else
+                                    {
+                                        <input asp-for="OrderHeader.City" class="form-control" readonly />
+                                    }
                                     <span asp-validation-for="OrderHeader.City" class="text-danger"></span>
                                 </div>
                             </div>
