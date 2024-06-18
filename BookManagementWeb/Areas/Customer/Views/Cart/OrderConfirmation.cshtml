@@ -4,27 +4,29 @@
 }
 <div class="container">
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-12 text-center vh-100 align-content-center ">
             @if (Model.ApplicationUser.CompanyID.GetValueOrDefault() == 0)
             {
             // Normal Customer
-                <h3 class="text-success">Order Placed Successfully !!</h3>
-                <h6>Your Order Number is: @Model.Id</h6>
+                <h4 class="text-success fw-bold">Your Order Number is: @Model.Id</h4>
+                <h3 class="text-success fw-bold">
+                    Order Placed Successfully !!
+                </h3>
             }
             else
             {
                 // Company Customer
                 if (Model.PaymentStatus != StaticDetail.PaymentStatus_Approved)
                 {
-                    <h6>Your Order Number is: @Model.Id</h6>
-                    <h3 class="text-info">
+                    <h4 class="text-success fw-bold">Your Order Number is: @Model.Id</h4>
+                    <h3 class="text-warning fw-bold">
                         Please wait for packaging..
                     </h3>
                 }
                 else
                 {
-                    <h6>Your Order Number is: @Model.Id</h6>
-                    <h3 class="text-success">
+                    <h4 class="fw-bold">Your Order Number is: @Model.Id</h4>
+                    <h3 class="text-success fw-bold">
                         Your Company has successfully paid.
                     </h3>
                 }
