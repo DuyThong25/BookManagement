@@ -43,6 +43,7 @@ builder.Services.AddAuthentication().AddFacebook(options =>
 {
     options.AppId = "1189090972275934";
     options.AppSecret = "fd86a02f696627b95ab05aa3099cc784";
+    options.AccessDeniedPath = "/Identity/Account/Login";
 });
 
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
