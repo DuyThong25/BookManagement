@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using BookManager.Utility;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Stripe;
+using BookManager.DataAccess.DbInitializer;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,10 +44,11 @@ builder.Services.AddAuthentication().AddFacebook(options =>
     options.AppId = "1189090972275934";
     options.AppSecret = "fd86a02f696627b95ab05aa3099cc784";
 });
+
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
+builder.Services.AddScoped<IDbinitializer, Dbinitializer>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IEmailSender, EmailSender>();
-
 
 var app = builder.Build();
 
@@ -68,7 +70,7 @@ app.UseAuthorization();
 
 // Add Session
 app.UseSession();
-
+SeedDatabase();
 app.MapRazorPages();
 app.MapControllerRoute(
     name: "default",
@@ -77,3 +79,13 @@ app.MapControllerRoute(
 StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe:SecretKey").Get<string>();
 
 app.Run();
+
+void SeedDatabase()
+{
+    // Using method in Dbinitializer
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbinitializer>();
+        dbInitializer.Initializer();
+    }
+}
