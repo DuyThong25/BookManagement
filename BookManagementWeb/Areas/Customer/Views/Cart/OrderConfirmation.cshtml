@@ -8,27 +8,32 @@
             @if (Model.ApplicationUser.CompanyID.GetValueOrDefault() == 0)
             {
             // Normal Customer
-                <h4 class="text-success fw-bold">Your Order Number is: @Model.Id</h4>
-                <h3 class="text-success fw-bold">
+                <h2 class="fw-bold">Your Order Number is: @Model.Id</h2>
+                <h1 class="text-success fw-bold">
                     Order Placed Successfully !!
-                </h3>
+                </h1>
+                <a class="text-dark text-opacity-50" href="https://mail.google.com/">Check your order in your Gmail</a>
             }
             else
             {
                 // Company Customer
                 if (Model.PaymentStatus != StaticDetail.PaymentStatus_Approved)
                 {
-                    <h4 class="text-success fw-bold">Your Order Number is: @Model.Id</h4>
-                    <h3 class="text-warning fw-bold">
+                    <h2 class="text-success fw-bold">Your Order Number is: @Model.Id</h2>
+                    <h1 class="text-warning fw-bold">
                         Please wait for packaging..
-                    </h3>
+                    </h1>
+                    <a class="text-dark text-opacity-50" href="https://mail.google.com/">Check it in Gmail</a>
+
                 }
                 else
                 {
-                    <h4 class="fw-bold">Your Order Number is: @Model.Id</h4>
-                    <h3 class="text-success fw-bold">
+                    <h2 class="fw-bold">Your Order Number is: @Model.Id</h2>
+                    <h1 class="text-success fw-bold">
                         Your Company has successfully paid.
-                    </h3>
+                    </h1>
+                    <a class="text-dark text-opacity-50" href="https://mail.google.com/">Check it in Gmail</a>
+
                 }
             }
         </div>

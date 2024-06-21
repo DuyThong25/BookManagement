@@ -32,6 +32,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="wwwroot\template\emails\EmailConfirmOrder.html" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Update="Areas\Admin\Views\Order\Index.cshtml">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
