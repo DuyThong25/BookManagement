@@ -3,6 +3,7 @@ using BookManager.Models;
 using BookManager.Models.ViewModel;
 using BookManager.Utility;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Stripe.Checkout;
@@ -15,12 +16,17 @@ namespace BookManagementWeb.Areas.Customer.Controllers
     public class CartController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IEmailSender _emailSender;
+        private readonly IWebHostEnvironment _webHostEnvironment;
+
         [BindProperty]
         public ShoppingCartVM ShoppingCartVM { get; set; }
 
-        public CartController(IUnitOfWork unitOfWork)
+        public CartController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment, IEmailSender emailSender)
         {
             _unitOfWork = unitOfWork;
+            _webHostEnvironment = webHostEnvironment;
+            _emailSender = emailSender;
         }
 
         public IActionResult Index()
@@ -195,6 +201,12 @@ namespace BookManagementWeb.Areas.Customer.Controllers
                         _unitOfWork.OrderHeader.UpdateStripePaymentID(id, session.Id, session.PaymentIntentId);
                         _unitOfWork.OrderHeader.UpdateStatus(id, StaticDetail.OrderStatus_Approved, StaticDetail.PaymentStatus_Approved);
                         _unitOfWork.Save();
+
+                        //Send Mail After Payment APPROVED
+                        string teamplate = TemplateEmailConfirmOrder(orderHeaderFromDB);
+                        _emailSender.SendEmailAsync(orderHeaderFromDB.ApplicationUser.Email
+                            , $"Thank you for your order - Your Order is {orderHeaderFromDB.Id}"
+                            , teamplate);
                     }
                 }
             }
@@ -209,6 +221,47 @@ namespace BookManagementWeb.Areas.Customer.Controllers
             return View(orderHeaderFromDB);
         }
 
+        private string TemplateEmailConfirmOrder(OrderHeader orderHeader)
+        {
+            var orderDetailFormDb = _unitOfWork.OrderDetail.GetAll(x => x.OrderHeaderId == orderHeader.Id, includeProperties: "Product").ToList();
+            string wwwRootPath = _webHostEnvironment.WebRootPath;
+
+            string productList = string.Empty;
+            double totalPrice = 0.0;
+            double TotalPriceAfterSurcharge = 0.0; // The Final Total Price
+            string CustomerAddress = string.Empty;
+            foreach (var item in orderDetailFormDb)
+            {
+                productList += "<tr>";
+                productList += "<td>" + item.Product.Title + "</td>";
+                productList += "<td>" + item.Count + "</td>";
+                productList += "<td>" + item.Price.ToString("c")+ "</td>";
+                productList += "</tr>";
+
+                totalPrice += item.Price * item.Count;
+            }
+
+            // Neu co giam gia thi se lay totalPrice - Discount và cuoi cung thi gan
+            // TotalPriceAfterSurcharge = totalPrice
+            TotalPriceAfterSurcharge = totalPrice;
+            CustomerAddress = $"{orderHeader.Address.Replace("đường","").Replace("Đường","")} street, Ward {orderHeader.Ward}, {orderHeader.District} District, {orderHeader.City} City";
+
+            string contentEmailConfirmOrder = System.IO.File.ReadAllText(Path.Combine(wwwRootPath, "template\\emails\\EmailConfirmOrder.html"));
+            contentEmailConfirmOrder = contentEmailConfirmOrder.Replace("{{OrderID}}", orderHeader.Id.ToString());
+            contentEmailConfirmOrder = contentEmailConfirmOrder.Replace("{{TrangThaiDon}}", orderHeader.PaymentStatus);
+            contentEmailConfirmOrder = contentEmailConfirmOrder.Replace("{{OrderDate}}", orderHeader.OrderDate.ToString());
+            contentEmailConfirmOrder = contentEmailConfirmOrder.Replace("{{CustomerName}}", orderHeader.Name);
+            contentEmailConfirmOrder = contentEmailConfirmOrder.Replace("{{CustomerPhone}}", orderHeader.PhoneNumber);
+            contentEmailConfirmOrder = contentEmailConfirmOrder.Replace("{{CustomerAddress}}", CustomerAddress);
+            contentEmailConfirmOrder = contentEmailConfirmOrder.Replace("{{CustomerEmail}}", orderHeader.ApplicationUser.Email);
+            contentEmailConfirmOrder = contentEmailConfirmOrder.Replace("{{Note}}", string.Empty);
+            contentEmailConfirmOrder = contentEmailConfirmOrder.Replace("{{ProductList}}", productList);
+            contentEmailConfirmOrder = contentEmailConfirmOrder.Replace("{{TotalPrice}}", totalPrice.ToString("c"));
+            contentEmailConfirmOrder = contentEmailConfirmOrder.Replace("{{Discount}}", "0");
+            contentEmailConfirmOrder = contentEmailConfirmOrder.Replace("{{TotalPriceAfterSurcharge}}", TotalPriceAfterSurcharge.ToString("c"));
+
+            return contentEmailConfirmOrder;
+        }
         private double GetBasePrice(ShoppingCart shoppingCart)
         {
             if (shoppingCart.Count < 50)
