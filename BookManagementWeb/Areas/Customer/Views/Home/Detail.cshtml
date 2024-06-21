@@ -1,5 +1,7 @@
 ﻿@model ShoppingCart
-
+@{
+    ViewData["Title"] = "Detail Book";
+}
 
 <form method="post">
     <input asp-for="ProductId" hidden />
@@ -76,7 +78,7 @@
                                   id="inputGroup-sizing-default">
                                 Count
                             </span>
-                            <input asp-for="Count" type="number" value="1" class="form-control text-end"
+                            <input asp-for="Count" type="number" value="1" min="1" max="1000" class="form-control text-end"
                                    aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" />
 
                         </div>
