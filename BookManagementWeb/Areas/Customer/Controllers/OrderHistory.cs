@@ -41,7 +41,7 @@ namespace BookManagementWeb.Areas.Customer.Controllers
         public IActionResult DetailPOST()
         {
             var orederDetailFromDB = _unitOfWork.OrderDetail.GetAll(x => x.OrderHeaderId == OrderVM.OrderHeader.Id, includeProperties: "Product").ToList();
-            var domain = "https://localhost:7121/";
+            var domain = Request.Scheme + "://" + Request.Host.Value + "/" /*"https://localhost:7121/"*/;
             var options = new Stripe.Checkout.SessionCreateOptions
             {
                 SuccessUrl = domain + $"customer/cart/OrderConfirmation?id={OrderVM.OrderHeader.Id}",

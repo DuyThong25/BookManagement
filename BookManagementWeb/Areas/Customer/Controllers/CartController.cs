@@ -147,7 +147,7 @@ namespace BookManagementWeb.Areas.Customer.Controllers
             // qua trinh thanh toan cua normal customer
             if (applicationUser.CompanyID.GetValueOrDefault() == 0)
             {
-                var domain = "https://localhost:7121/";
+                var domain =  Request.Scheme + "://" + Request.Host.Value + "/" /*"https://localhost:7121/"*/;
                 var options = new Stripe.Checkout.SessionCreateOptions
                 {
                     SuccessUrl = domain + $"customer/cart/OrderConfirmation?id={ShoppingCartVM.OrderHeader.Id}",
