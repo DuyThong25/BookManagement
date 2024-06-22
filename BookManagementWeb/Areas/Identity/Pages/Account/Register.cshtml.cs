@@ -158,9 +158,16 @@ namespace BookManagementWeb.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (!User.IsInRole(StaticDetail.Role_Admin) && !User.IsInRole(StaticDetail.Role_Employee))
             {
-                if ((DateTime.Now.Year - DateTime.Parse(Input.BirthDay.ToString()).Year) < 12)
+                if (!String.IsNullOrEmpty(Input.BirthDay.ToString()))
                 {
-                    ModelState.AddModelError("Input.BirthDay", "Must be 12+ years old");
+                    if ((DateTime.Now.Year - DateTime.Parse(Input.BirthDay.ToString()).Year) < 12)
+                    {
+                        ModelState.AddModelError("Input.BirthDay", "Must be 12+ years old");
+                    }
+                }
+                else
+                {
+                    ModelState.AddModelError("Input.BirthDay", "Birthdaty can not be null");
                 }
             }
             if (Input.Role == StaticDetail.Role_Company && String.IsNullOrEmpty(Input.CompanyId.ToString()))
