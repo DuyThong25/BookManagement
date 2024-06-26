@@ -25,5 +25,8 @@ namespace BookManager.Models
         [ForeignKey("CompanyID")]
         [ValidateNever]
         public Company Company { get; set; }
+
+        [NotMapped]
+        public string Role { get; set; }
     }
 }
