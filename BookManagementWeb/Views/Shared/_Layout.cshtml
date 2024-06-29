@@ -45,19 +45,24 @@
                                     <li>
                                         <a class="dropdown-item" asp-area="Admin" asp-controller="Product" asp-action="Index">Product</a>
                                     </li>
+                                    <li><hr class="dropdown-divider"></li>
                                     <li>
                                         <a class="dropdown-item" asp-area="Admin" asp-controller="Company" asp-action="Index">Company</a>
                                     </li>
+                                    <li><hr class="dropdown-divider"></li>
                                     <li>
                                         <a class="dropdown-item" asp-area="Admin" asp-controller="Order" asp-action="Index">Order</a>
                                     </li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li>
-                                        <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Register">Register User</a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" asp-area="Admin" asp-controller="User" asp-action="Index">Manage User</a>
-                                    </li>
+                                    @if (User.IsInRole(StaticDetail.Role_Admin))
+                                    {
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Register">Register User</a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-area="Admin" asp-controller="User" asp-action="Index">Manage User</a>
+                                        </li>
+                                    }
                                     @*  <li><a class="dropdown-item" href="#">Action</a></li>
                                 <li><a class="dropdown-item" href="#">Another action</a></li>
                                 <li><hr class="dropdown-divider"></li>
