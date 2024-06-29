@@ -22,7 +22,7 @@
             <form method="post" class="row" enctype="multipart/form-data">
                 @* <div asp-validation-summary="All"></div> *@
                 <input asp-for="Product.ProductId" hidden />
-                <input asp-for="Product.ImageUrl" hidden />
+                @* <input asp-for="Product.ImageUrl" hidden /> *@
 
                 <div class="row">
                     <div class="col-md-8">
@@ -84,20 +84,20 @@
                         </div>
                         <div class="form-floating py-2 col-12">
                             <input type="file" name="file" class="form-control border-0 shadow" />
-                            <label asp-for="Product.ImageUrl"></label>
-                            <span asp-validation-for="Product.ImageUrl" class="text-danger"></span>
+                         @*    <label asp-for="Product.ImageUrl"></label>
+                            <span asp-validation-for="Product.ImageUrl" class="text-danger"></span> *@
                         </div>
 
                     </div>
                     <div class="col-md-4 text-center">
-                        @if (Model.Product.ProductId == 0)
-                        {
                             <img width="300" class="img-fluid rounded border border-1" src="/images/product/no_image.jpg" alt="Image of Book" />
+                       @*  @if (Model.Product.ProductId == 0)
+                        {
                         }
                         else
                         {
                             <img width="300" class="img-fluid rounded border border-1" src="@Model.Product.ImageUrl" alt="No image found.." />
-                        }
+                        } *@
                     </div>
                     <div class="row mt-3">
                         <div class="col-6 col-lg-3">

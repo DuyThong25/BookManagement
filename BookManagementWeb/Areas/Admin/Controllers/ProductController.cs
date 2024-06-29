@@ -58,7 +58,7 @@ namespace BookManagementWeb.Areas.Admin.Controllers
                 // Handle imgae
                 if(file != null)
                 {
-                    productVM.Product.ImageUrl = HandleToGetFileImage(productVM, file);
+                    //productVM.Product.ImageUrl = HandleToGetFileImage(productVM, file);
                 }
 
                 if(productVM.Product.ProductId == 0) // Create
@@ -89,14 +89,14 @@ namespace BookManagementWeb.Areas.Admin.Controllers
         }
         public void HandleDeleteFileImage(Product product,string wwwRootPath)
         {
-            if (!String.IsNullOrEmpty(product.ImageUrl)) // update -> delete file cu
-            {
-                string fileDelete = Path.Combine(wwwRootPath, product.ImageUrl.TrimStart('\\'));
-                if (System.IO.File.Exists(fileDelete))
-                {
-                    System.IO.File.Delete(fileDelete);
-                }
-            }
+            //if (!String.IsNullOrEmpty(product.ImageUrl)) // update -> delete file cu
+            //{
+            //    string fileDelete = Path.Combine(wwwRootPath, product.ImageUrl.TrimStart('\\'));
+            //    if (System.IO.File.Exists(fileDelete))
+            //    {
+            //        System.IO.File.Delete(fileDelete);
+            //    }
+            //}
         }
         public string HandleToGetFileImage(ProductVM productVM, IFormFile file)
         {

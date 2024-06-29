@@ -16,16 +16,16 @@
             <div class="col-md-6 col-lg-5 d-none d-md-block">
                 <div class="pe-4">
                     @* <img src="https://placehold.co/500x600" width="100" class="rounded" /> *@
-                    @if (!String.IsNullOrEmpty(@Model.Product.ImageUrl))
+                  @*   @if (!String.IsNullOrEmpty(@Model.Product.ImageUrl))
                     {
                         <img class="w-100 h-100 img-fluid rounded rounded-top-2 rounded-bottom-5 " src="@Model.Product.ImageUrl" />
                     }
                     else
                     {
+                    } *@
                         <div class="border border-1 border-black border-opacity-10 shadow rounded rounded-top-2 rounded-bottom-5 ">
                             <img class="w-100 h-100 img-fluid rounded rounded-top-2 rounded-bottom-5 " src="~/images/product/no_image.jpg" />
                         </div>
-                    }
                 </div>
             </div>
             <div class="col-md-6 col-lg-7">

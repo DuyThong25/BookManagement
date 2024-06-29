@@ -59,14 +59,14 @@
             <div class="col-md-3 d-flex justify-content-evenly my-5">
                 <div class="card border-0 border-5 border-top shadow rounded-2 text-center p-2" style="width:260px">
                     <div class="h-100">
-                        @if (String.IsNullOrEmpty(obj.ImageUrl))
-                        {
                             <img class="card-img-top rounded" src="~/images//product/no_image.jpg" alt="Card Book">
+                      @*   @if (String.IsNullOrEmpty(obj.ImageUrl))
+                        {
                         }
                         else
                         {
                             <img class="card-img-top rounded" src="@obj.ImageUrl" alt="Card Book">
-                        }
+                        } *@
                     </div>
                     <div class="card-body">
                         <div style="height:70px;" class="d-flex flex-column justify-content-center mh-100">
