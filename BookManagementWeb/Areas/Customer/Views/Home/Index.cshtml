@@ -78,8 +78,8 @@
                             <p class="card-title text-warning">by <b>@obj.Author</b></p>
                         </div>
                         <div>
-                            <p class="text-black text-opacity-50 m-0">List price: <span class="text-decoration-line-through ">@obj.ListPrice.ToString(StaticDetail.VndCurrency())</span></p>
-                            <p>As low as <b>@obj.Price100.ToString(StaticDetail.VndCurrency())</b></p>
+                            <p class="text-black text-opacity-50 m-0">List price: <span class="text-decoration-line-through ">@obj.ListPrice.ToString("c")</span></p>
+                            <p>As low as <b>@obj.Price100.ToString("c")</b></p>
                         </div>
                         <div>
                             <a asp-area="Customer" asp-controller="Home" asp-action="Detail" asp-route-productId="@obj.ProductId" asp- class="btn btn-primary bg-gradient border-0 form-control">Detail</a>
