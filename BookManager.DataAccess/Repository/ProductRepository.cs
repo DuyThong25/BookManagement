@@ -17,9 +17,13 @@ namespace BookManager.DataAccess.Repository
             _db = db;
         }
 
-        public void Update(Product product)
+        public void Update(Product obj)
         {
-            _db.Products.Update(product);
+            var productFromDB = _db.Products.FirstOrDefault(x => x.ProductId == obj.ProductId);
+            if (productFromDB != null)
+            {
+                productFromDB.ProductImages = obj.ProductImages;
+            }
         }
     }
 }

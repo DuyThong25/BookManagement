@@ -16,7 +16,7 @@ namespace BookManagementWeb.Areas.Admin.Controllers
     public class ProductController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IWebHostEnvironment _webHostEnvironment ;
+        private readonly IWebHostEnvironment _webHostEnvironment;
         public ProductController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment)
         {
             _unitOfWork = unitOfWork;
@@ -51,27 +51,31 @@ namespace BookManagementWeb.Areas.Admin.Controllers
 
         }
         [HttpPost]
-        public IActionResult CreateOrUpdate(ProductVM productVM, IFormFile? file)
+        public IActionResult CreateOrUpdate(ProductVM productVM, List<IFormFile>? files)
         {
             if (ModelState.IsValid)
-            {   
-                // Handle imgae
-                if(file != null)
-                {
-                    //productVM.Product.ImageUrl = HandleToGetFileImage(productVM, file);
-                }
-
-                if(productVM.Product.ProductId == 0) // Create
+            {
+                if (productVM.Product.ProductId == 0) // Create
                 {
                     _unitOfWork.Product.Add(productVM.Product);
                     _unitOfWork.Save();
                     TempData["success"] = "Product add successfully";
-                }else // update
+                }
+                else // update
                 {
                     _unitOfWork.Product.Update(productVM.Product);
                     _unitOfWork.Save();
                     TempData["success"] = "Product edit successfully";
                 }
+
+                // Handle image
+                if (files != null)
+                {
+                    productVM.Product.ProductImages = HandleToGetFileImage(productVM, files);
+                    _unitOfWork.Product.Update(productVM.Product);
+                    _unitOfWork.Save();
+                }
+
                 return RedirectToAction("Index");
             }
             else
@@ -87,29 +91,46 @@ namespace BookManagementWeb.Areas.Admin.Controllers
                 return View(productVM);
             }
         }
-        public void HandleDeleteFileImage(Product product,string wwwRootPath)
-        {
-            //if (!String.IsNullOrEmpty(product.ImageUrl)) // update -> delete file cu
-            //{
-            //    string fileDelete = Path.Combine(wwwRootPath, product.ImageUrl.TrimStart('\\'));
-            //    if (System.IO.File.Exists(fileDelete))
-            //    {
-            //        System.IO.File.Delete(fileDelete);
-            //    }
-            //}
-        }
-        public string HandleToGetFileImage(ProductVM productVM, IFormFile file)
-        {
-            string wwwRootPath = _webHostEnvironment.WebRootPath;
-            string productPath = Path.Combine(wwwRootPath, @"images\product");
-            string fileName = Guid.NewGuid().ToString() + Path.GetFileName(file.FileName);
 
-            HandleDeleteFileImage(productVM.Product, wwwRootPath);
-            using (var fileStream = new FileStream(Path.Combine(productPath, fileName), FileMode.Create))
+        public List<ProductImage> HandleToGetFileImage(ProductVM productVM, List<IFormFile>? files)
+        {
+            List<ProductImage> reuslt = new();
+
+            foreach (IFormFile file in files)
             {
-                file.CopyTo(fileStream);
+                string wwwRootPath = _webHostEnvironment.WebRootPath;
+                string fileName = Guid.NewGuid().ToString() + "-" + Path.GetFileName(file.FileName);
+                string productPath = Path.Combine("images", "products", "product-" + productVM.Product.ProductId.ToString());
+                string finalPath = Path.Combine(wwwRootPath, productPath);
+
+                // If folder are not created -> create
+                if (!Directory.Exists(finalPath))
+                {
+                    Directory.CreateDirectory(finalPath);
+                }
+                // copy hinh vao folder
+                using (var fileStream = new FileStream(Path.Combine(finalPath, fileName), FileMode.Create))
+                {
+                    file.CopyTo(fileStream);
+                }
+
+                ProductImage productImage = new()
+                {
+                    ImageUrl = @"\" + productPath + @"\" + fileName,
+                    ProductId = productVM.Product.ProductId,
+                };
+
+                if (productImage.ImageUrl == null)
+                {
+                    reuslt = new List<ProductImage>();
+                }
+                else
+                {
+                    reuslt.Add(productImage);
+                }
+                //HandleDeleteFileImage(productVM.Product, wwwRootPath);
             }
-            return @"\images\product\" + fileName;
+            return reuslt;
         }
 
         #region Api Method
@@ -131,7 +152,7 @@ namespace BookManagementWeb.Areas.Admin.Controllers
             {
                 _unitOfWork.Product.Remove(product);
                 _unitOfWork.Save();
-                HandleDeleteFileImage(product, wwwRootPath);
+                //HandleDeleteFileImage(product, wwwRootPath);
                 return Json(new { success = true, message = "Delete Succesful" });
             }
             else
