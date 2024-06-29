@@ -74,7 +74,7 @@ html {
 }
 
 .text-primary {
-    color: #192E2F !important;
+    color: #2C3E50 !important;
 }
 
 .text-success {
@@ -82,7 +82,7 @@ html {
 }
 
 .bg-primary {
-    background-color: #192E2F !important;
+    background-color: #2C3E50 !important;
 }
 
 .bg-secondary {
@@ -96,7 +96,7 @@ bg-success {
 
 
 .card {
-    border-color: #425F4B !important;
+    border-color: #2C3E50 !important;
 }
 
 
@@ -106,16 +106,16 @@ bg-success {
 
 
 .btn-outline-primary {
-    color: #192E2F;
-    border-color: #192E2F;
+    color: #2C3E50;
+    border-color: #2C3E50;
 }
 
 
 
     .btn-outline-primary:hover {
         color: #fff;
-        background-color: #192E2F;
-        border-color: #192E2F;
+        background-color: #2C3E50;
+        border-color: #2C3E50;
     }
 
 
@@ -129,8 +129,8 @@ bg-success {
     .btn-check:checked + .btn-outline-primary,
     .btn-check:active + .btn-outline-primary, .btn-outline-primary:active, .btn-outline-primary.active, .btn-outline-primary.dropdown-toggle.show {
         color: #fff;
-        background-color: #192E2F;
-        border-color: #192E2F;
+        background-color: #2C3E50;
+        border-color: #2C3E50;
     }
 
 
@@ -143,7 +143,7 @@ bg-success {
 
 
     .btn-outline-primary:disabled, .btn-outline-primary.disabled {
-        color: #192E2F;
+        color: #2C3E50;
         background-color: transparent;
     }
 
@@ -243,24 +243,24 @@ bg-success {
 
 .btn-primary {
     color: #fff;
-    background-color: #192E2F;
-    border-color: #192E2F;
+    background-color: #2C3E50;
+    border-color: #2C3E50;
 }
 
 
 
     .btn-primary:hover {
         color: #fff;
-        background-color: #445f5e;
-        border-color: #445f5e;
+        background-color: #253544;
+        border-color: #253544;
     }
 
 
 
     .btn-check:focus + .btn-primary, .btn-primary:focus {
         color: #fff;
-        background-color: #445f5e;
-        border-color: #445f5e;
+        background-color: #253544;
+        border-color: #253544;
         box-shadow: 0 0 0 0.25rem rgba(60, 60, 60, 0.5);
     }
 
@@ -270,8 +270,8 @@ bg-success {
     .btn-check:active + .btn-primary, .btn-primary:active, .btn-primary.active,
     .show > .btn-primary.dropdown-toggle {
         color: #fff;
-        background-color: #445f5e;
-        border-color: #445f5e;
+        background-color: #253544;
+        border-color: #253544;
     }
 
 
@@ -286,8 +286,8 @@ bg-success {
 
     .btn-primary:disabled, .btn-primary.disabled {
         color: #fff;
-        background-color: #445f5e;
-        border-color: #445f5e;
+        background-color: #253544;
+        border-color: #253544;
     }
 
 

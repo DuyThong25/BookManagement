@@ -1,0 +1,111 @@
+﻿@model IEnumerable<ApplicationUser>
+@{
+    ViewData["Title"] = "Manage User";
+}
+<div class="container">
+    <div class="card shadow border-1 mt-4">
+        <div class="card-header bg-primary bg-gradient  py-3">
+            <div class="row">
+                <div class="col-12 text-center text-white">
+                    <h2>Manage User</h2>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="container-fluid mb-3">
+                <div class="row">
+                    <div class="col-12 text-start p-0">
+                        <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Create new User
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table id="myTable" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Company</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (ApplicationUser item in Model)
+                        {
+                            <tr>
+                                <td>@item.Name</td>
+                                <td>@item.Email</td>
+                                <td>@item.PhoneNumber</td>
+                                @if (item.Company == null)
+                                {
+                                    <td></td>
+                                }
+                                else
+                                {
+                                    <td>@item.Company.Name</td>
+                                }
+                                <td>@item.Role</td>
+                                @if (item.LockoutEnd != null && item.LockoutEnd > DateTime.Now)
+                                {
+                                    <td title="Until @item.LockoutEnd" class="text-danger">
+                                        Locked
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td class="text-success">
+                                        Avaiable
+                                    </td>
+                                }
+                                <td class="text-center">
+                                    <div class="w-100 btn-group" role="group">
+
+                                        @* Currently lock -> Unlock *@
+                                        @if (item.LockoutEnd != null && item.LockoutEnd > DateTime.Now)
+                                        {
+                                            <a onclick="HandleLockoutend(`@item.Id`, this)" class="btn btn-outline-success w-100 mx-2">
+                                                <i class="bi bi-unlock"> Unlook</i>
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <a onclick="HandleLockoutend(`@item.Id`, this)" class="btn btn-outline-danger w-100 mx-2">
+                                                <i class="bi bi-lock"> Look</i>
+                                            </a>
+                                        }
+                                        <a asp-action="Pemission" asp-route-id="@item.Id" class="btn btn-danger mx-2 text-uppercase w-100">
+                                            permission
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function HandleLockoutend(id, element) {
+            $.post(
+                "/Admin/User/LockUnlockUser",
+                {
+                    id: `${id}`
+                }, 
+                (data, status) => {
+                    console.log(data, status)
+                    window.location.reload();
+
+                }
+            )
+        }
+    </script>
+}

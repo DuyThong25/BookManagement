@@ -34,6 +34,12 @@ namespace BookManagementWeb.Areas.Customer.Controllers
             var claimsIdentity = User.Identity as ClaimsIdentity;
             var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
 
+            if(TempData["orderHeaderID"] != null)
+            {
+                var orderHeaderFromDB = _unitOfWork.OrderHeader.Get(x => x.Id == TempData["orderHeaderID"] as int?);
+                _unitOfWork.OrderHeader.Remove(orderHeaderFromDB);
+                _unitOfWork.Save();
+            }
             ShoppingCartVM = new()
             {
                 ShoppingCartList = _unitOfWork.ShoppingCart.GetAll(x => x.ApplicationUserId == userId, includeProperties: "Product"),
@@ -147,7 +153,7 @@ namespace BookManagementWeb.Areas.Customer.Controllers
             // qua trinh thanh toan cua normal customer
             if (applicationUser.CompanyID.GetValueOrDefault() == 0)
             {
-                var domain =  Request.Scheme + "://" + Request.Host.Value + "/" /*"https://localhost:7121/"*/;
+                var domain = Request.Scheme + "://" + Request.Host.Value + "/" /*"https://localhost:7121/"*/;
                 var options = new Stripe.Checkout.SessionCreateOptions
                 {
                     SuccessUrl = domain + $"customer/cart/OrderConfirmation?id={ShoppingCartVM.OrderHeader.Id}",
@@ -155,6 +161,7 @@ namespace BookManagementWeb.Areas.Customer.Controllers
                     LineItems = new List<Stripe.Checkout.SessionLineItemOptions>(),
                     Mode = "payment",
                 };
+                TempData["orderHeaderID"] = ShoppingCartVM.OrderHeader.Id;
                 // configure san pham trong gio hang
                 foreach (var cart in ShoppingCartVM.ShoppingCartList)
                 {
@@ -235,7 +242,7 @@ namespace BookManagementWeb.Areas.Customer.Controllers
                 productList += "<tr>";
                 productList += "<td>" + item.Product.Title + "</td>";
                 productList += "<td>" + item.Count + "</td>";
-                productList += "<td>" + item.Price.ToString("c")+ "</td>";
+                productList += "<td>" + item.Price.ToString("c") + "</td>";
                 productList += "</tr>";
 
                 totalPrice += item.Price * item.Count;
@@ -244,7 +251,7 @@ namespace BookManagementWeb.Areas.Customer.Controllers
             // Neu co giam gia thi se lay totalPrice - Discount và cuoi cung thi gan
             // TotalPriceAfterSurcharge = totalPrice
             TotalPriceAfterSurcharge = totalPrice;
-            CustomerAddress = $"{orderHeader.Address.Replace("đường","").Replace("Đường","")} street, Ward {orderHeader.Ward}, {orderHeader.District} District, {orderHeader.City} City";
+            CustomerAddress = $"{orderHeader.Address.Replace("đường", "").Replace("Đường", "")} street, Ward {orderHeader.Ward}, {orderHeader.District} District, {orderHeader.City} City";
 
             string contentEmailConfirmOrder = System.IO.File.ReadAllText(Path.Combine(wwwRootPath, "template\\emails\\EmailConfirmOrder.html"));
             contentEmailConfirmOrder = contentEmailConfirmOrder.Replace("{{OrderID}}", orderHeader.Id.ToString());

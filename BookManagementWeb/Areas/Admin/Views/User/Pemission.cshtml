@@ -1,0 +1,69 @@
+﻿@model RoleManagerVM;
+@{
+    ViewData["Title"] = "Update User Pemission";
+    string isCompanyStyle = "";
+    if (Model.ApplicationUser.CompanyID == null)
+    {
+        isCompanyStyle = "d-none";
+    }
+    else
+    {
+        isCompanyStyle = "d-display";
+    }
+}
+<div class="container">
+    <div class="card shadow border-1 mt-4">
+        <div class="card-header bg-primary bg-gradient ml-0 py-3">
+            <div class="row">
+                <div class="col-12 text-center text-white">
+                    <h2>Update Permission</h2>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-4">
+            <form method="post" class="row">
+                <input asp-for="ApplicationUser.Id" hidden />
+                @* <div asp-validation-summary="All"></div> *@
+                <div class="form-floating py-2 col-12">
+                    <input asp-for="ApplicationUser.Name" readonly class="form-control border-0 shadow " />
+                    <label asp-for="ApplicationUser.Name" class="ms-2"></label>
+                </div>
+                <div class="form-floating py-2 col-12">
+                    <select asp-for="ApplicationUser.Role" asp-items="@Model.RoleList" class="form-select">
+                    </select>
+                </div>
+                <div class="form-floating py-2 col-12 @isCompanyStyle">
+                    <select asp-for="ApplicationUser.CompanyID" asp-items="@Model.CompanyList" class="form-select">
+                    </select>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-6 col-lg-3">
+                        <button type="submit" class="form-control btn btn-primary">Update</button>
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <a asp-controller="User" asp-action="Index" class="form-control btn btn-outline-primary">Back to list</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+@*     @{
+        <partial name="_ValidationScriptsPartial"></partial>
+    } *@
+    <script>
+        document.getElementById("ApplicationUser_Role").onchange = (e) => {
+            if (e.srcElement.value == "Company") {
+                document.getElementById("ApplicationUser_CompanyID").closest("div").classList.remove("d-none");
+                document.getElementById("ApplicationUser_CompanyID").closest("div").classList.add("d-display");
+            }
+            else {
+                document.getElementById("ApplicationUser_CompanyID").closest("div").classList.remove("d-display");
+                document.getElementById("ApplicationUser_CompanyID").closest("div").classList.add("d-none");
+            }
+        }
+    </script>
+} 

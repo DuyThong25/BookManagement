@@ -7,10 +7,12 @@
     <input asp-for="ProductId" hidden />
 
     <div class="container mt-4 ">
-        <a asp-action="Index" class="mb-4 ms-4 btn btn-outline-primary bg-gradient fw-semibold btn-sm text-uppercase">
-            <small>Back to home</small>
-        </a>
         <div class="row p-4 shadow border border-1 border-black border-opacity-10 rounded rounded-1">
+            <div class="text-dark text-opacity-50 mb-3">
+                <a asp-action="Index" class="btn btn-outline-primary">
+                    <i class="bi bi-caret-left"></i> Back to Home
+                </a>
+            </div>
             <div class="col-md-6 col-lg-5 d-none d-md-block">
                 <div class="pe-4">
                     @* <img src="https://placehold.co/500x600" width="100" class="rounded" /> *@
@@ -20,7 +22,9 @@
                     }
                     else
                     {
-                        <img class="w-100 h-100 img-fluid rounded rounded-top-2 rounded-bottom-5 " src="~/images/product/no_image.jpg" />
+                        <div class="border border-1 border-black border-opacity-10 shadow rounded rounded-top-2 rounded-bottom-5 ">
+                            <img class="w-100 h-100 img-fluid rounded rounded-top-2 rounded-bottom-5 " src="~/images/product/no_image.jpg" />
+                        </div>
                     }
                 </div>
             </div>
@@ -36,7 +40,7 @@
                     <h6 class="text-dark text-opacity-50 pb-2">
                         List Price:
                         <span class="text-decoration-line-through">
-                            @Model.Product.ListPrice.ToString(StaticDetail.VndCurrency())
+                            @Model.Product.ListPrice.ToString("c")
                         </span>
                     </h6>
 
@@ -61,13 +65,13 @@
                         <div>Price</div>
                     </div>
                     <div class="p-1 col-3 col-lg-2 bg-white text-warning fw-bold">
-                        <div>@Model.Product.Price.ToString(StaticDetail.VndCurrency())</div>
+                        <div>@Model.Product.Price.ToString("c")</div>
                     </div>
                     <div class="p-1 col-3 col-lg-2 bg-white text-warning fw-bold">
-                        <div>@Model.Product.Price50.ToString(StaticDetail.VndCurrency())</div>
+                        <div>@Model.Product.Price50.ToString("c")</div>
                     </div>
                     <div class="p-1 col-3 col-lg-2 bg-white text-warning fw-bold">
-                        <div>@Model.Product.Price100.ToString(StaticDetail.VndCurrency())</div>
+                        <div>@Model.Product.Price100.ToString("c")</div>
                     </div>
                 </div>
 
