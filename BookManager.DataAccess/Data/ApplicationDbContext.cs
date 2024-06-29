@@ -18,6 +18,7 @@ namespace BookManager.DataAccess.Data
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
 		public DbSet<OrderHeader> OrderHeaders { get; set; }
 		public DbSet<OrderDetail> OrderDetails { get; set; }
+		public DbSet<ProductImage> ProductImages { get; set; }
 
 
 		// OnModelCreating Sử dụng để tạo dữ liệu cho csdl và 
