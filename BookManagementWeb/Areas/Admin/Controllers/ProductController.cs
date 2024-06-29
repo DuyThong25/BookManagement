@@ -152,7 +152,7 @@ namespace BookManagementWeb.Areas.Admin.Controllers
                 _unitOfWork.Save();
                 TempData["success"] = "Deleted Succesfully.";
             }
-            return RedirectToAction(nameof(CreateOrUpdate), new {id = productId });
+            return RedirectToAction(nameof(CreateOrUpdate), new { id = productId });
         }
 
         #region Api Method
@@ -167,19 +167,35 @@ namespace BookManagementWeb.Areas.Admin.Controllers
         [HttpDelete]
         public IActionResult Delete(int id)
         {
-            Product? product = _unitOfWork.Product.Get(x => x.ProductId == id);
+            Product? productTobeDelete = _unitOfWork.Product.Get(x => x.ProductId == id);
             string wwwRootPath = _webHostEnvironment.WebRootPath;
 
-            if (product != null)
+            if (productTobeDelete != null)
             {
-                _unitOfWork.Product.Remove(product);
+                _unitOfWork.Product.Remove(productTobeDelete);
                 _unitOfWork.Save();
-                //HandleDeleteFileImage(product, wwwRootPath);
-                return Json(new { success = true, message = "Delete Succesful" });
+
+                string productPath = Path.Combine("images", "products", "product-" + id.ToString());
+                string finalPath = Path.Combine(wwwRootPath, productPath);
+
+                // If folder are Exists
+                if (Directory.Exists(finalPath))
+                {
+                    // Firstly, Remove item in file
+                    string[] filePaths = Directory.GetFiles(finalPath);
+                    foreach (string filePath in filePaths)
+                    {
+                        System.IO.File.Delete(filePath);
+                    }
+
+                    Directory.Delete(finalPath);
+                }
+
+                return Json(new { success = true, message = "Delete Succesfully." });
             }
             else
             {
-                return Json(new { success = false, message = "Delete Fail" });
+                return Json(new { success = false, message = "Delete Fail." });
             }
         }
 
