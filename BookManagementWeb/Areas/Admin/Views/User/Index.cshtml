@@ -30,6 +30,7 @@
                             <th>Phone</th>
                             <th>Company</th>
                             <th>Role</th>
+                            <th>Status</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -49,14 +50,37 @@
                                     <td>@item.Company.Name</td>
                                 }
                                 <td>@item.Role</td>
+                                @if (item.LockoutEnd != null && item.LockoutEnd > DateTime.Now)
+                                {
+                                    <td title="Until @item.LockoutEnd" class="text-danger">
+                                        Locked
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td class="text-success">
+                                        Avaiable
+                                    </td>
+                                }
                                 <td class="text-center">
                                     <div class="w-100 btn-group" role="group">
-                                        <a asp-controller="User" asp-action="CreateOrUpdate" asp-route-id="@item.Id" class="btn btn-primary mx-2">
-                                            <i class="bi bi-pencil-square"> Edit</i>
+
+                                        @* Currently lock -> Unlock *@
+                                        @if (item.LockoutEnd != null && item.LockoutEnd > DateTime.Now)
+                                        {
+                                            <a onclick="HandleLockoutend(`@item.Id`, this)" class="btn btn-outline-success w-100 mx-2">
+                                                <i class="bi bi-unlock"> Unlook</i>
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <a onclick="HandleLockoutend(`@item.Id`, this)" class="btn btn-outline-danger w-100 mx-2">
+                                                <i class="bi bi-lock"> Look</i>
+                                            </a>
+                                        }
+                                        <a asp-action="Pemission" asp-route-id="@item.Id" class="btn btn-danger mx-2 text-uppercase w-100">
+                                            permission
                                         </a>
-                                        @*  <a onclick="DeleteConfirm('/admin/company/delete/@item.Id', this)" class="btn btn-outline-danger mx-2">
-                                    <i class="bi bi-trash"> Delete</i>
-                                    </a> *@
                                     </div>
                                 </td>
                             </tr>
@@ -68,3 +92,20 @@
     </div>
 </div>
 
+@section Scripts {
+    <script>
+        function HandleLockoutend(id, element) {
+            $.post(
+                "/Admin/User/LockUnlockUser",
+                {
+                    id: `${id}`
+                }, 
+                (data, status) => {
+                    console.log(data, status)
+                    window.location.reload();
+
+                }
+            )
+        }
+    </script>
+}
