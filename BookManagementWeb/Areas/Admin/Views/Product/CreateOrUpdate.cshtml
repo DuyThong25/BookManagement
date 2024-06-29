@@ -81,20 +81,35 @@
                             <span asp-validation-for="Product.CategoryId" class="text-danger"></span>
                         </div>
                         <div class="form-floating py-2 col-12">
-                            <input type="file" name="files" class="form-control border-0 shadow" multiple/>
+                            <input type="file" name="files" class="form-control border-0 shadow" multiple />
                             <label asp-for="Product.ProductImages"></label>
                         </div>
 
                     </div>
-                    <div class="col-md-4 text-center">
-                            <img width="300" class="img-fluid rounded border border-1" src="/images/product/no_image.jpg" alt="Image of Book" />
-                       @*  @if (Model.Product.ProductId == 0)
+                    <div class="col-md-4 d-flex flex-column align-items-center">
+                        @if (Model.Product.ProductId == 0)
                         {
+                            <img width="300" class="img-fluid rounded border border-1" src="/images/product/no_image.jpg" alt="Image of Book" />
                         }
                         else
                         {
-                            <img width="300" class="img-fluid rounded border border-1" src="@Model.Product.ImageUrl" alt="No image found.." />
-                        } *@
+                            if (Model.Product.ProductImages.Count > 0)
+                            {
+                                foreach (var item in Model.Product.ProductImages)
+                                {
+                                    <div style="width:300px;" class="mb-4 position-relative">
+                                        <img class="img-fluid rounded border border-1 border-opacity-10 shadow " src="@item.ImageUrl" alt="No image found.." />
+                                        <button asp-action="DeleteImage" asp-route-imageId="@item.ID" title="Remove Image" class="btn btn-outline-danger border-black border-opacity-10  position-absolute bottom-0 end-0 w-100">
+                                            <i class="bi bi-trash h4 fw-bold"></i>
+                                        </button>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <img width="300" class="img-fluid rounded border border-1" src="/images/product/no_image.jpg" alt="Image of Book" />
+                            }
+                        }
                     </div>
                     <div class="row mt-3">
                         <div class="col-6 col-lg-3">

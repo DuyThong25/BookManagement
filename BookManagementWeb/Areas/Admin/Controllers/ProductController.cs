@@ -45,7 +45,7 @@ namespace BookManagementWeb.Areas.Admin.Controllers
             };
             if (id != null && id != 0) // update
             {
-                productVM.Product = _unitOfWork.Product.Get(x => x.ProductId == id, includeProperties: "Category");
+                productVM.Product = _unitOfWork.Product.Get(x => x.ProductId == id, includeProperties: "Category,ProductImages");
             }
             return View(productVM);
 
@@ -131,6 +131,28 @@ namespace BookManagementWeb.Areas.Admin.Controllers
                 //HandleDeleteFileImage(productVM.Product, wwwRootPath);
             }
             return reuslt;
+        }
+
+        public IActionResult DeleteImage(int imageId)
+        {
+            var imageToBeDeleted = _unitOfWork.ProductImage.Get(x => x.ID == imageId);
+            int productId = imageToBeDeleted.ProductId;
+            if (imageToBeDeleted != null)
+            {
+                if (!String.IsNullOrEmpty(imageToBeDeleted.ImageUrl))
+                {
+                    string fileDelete = Path.Combine(_webHostEnvironment.WebRootPath, imageToBeDeleted.ImageUrl.TrimStart('\\'));
+                    if (System.IO.File.Exists(fileDelete))
+                    {
+                        System.IO.File.Delete(fileDelete);
+                    }
+                }
+
+                _unitOfWork.ProductImage.Remove(imageToBeDeleted);
+                _unitOfWork.Save();
+                TempData["success"] = "Deleted Succesfully.";
+            }
+            return RedirectToAction(nameof(CreateOrUpdate), new {id = productId });
         }
 
         #region Api Method
