@@ -7,7 +7,7 @@
     <div class="row h-100">
         <div class="col-md-7 d-flex flex-column justify-content-center px-5  ">
             <div class="w-75">
-                <h1 style="font-size:8vh;" class="text-white  text-uppercase">
+                <h1 style="font-size:8vh;" class="text-white text-uppercase">
                     Buy books at the best prices
                 </h1>
             </div>
@@ -59,19 +59,19 @@
             <div class="col-md-3 d-flex justify-content-evenly my-5">
                 <div class="card border-0 border-5 border-top shadow rounded-2 text-center p-2" style="width:260px">
                     <div class="h-100">
-                            <img class="card-img-top rounded" src="~/images//product/no_image.jpg" alt="Card Book">
-                      @*   @if (String.IsNullOrEmpty(obj.ImageUrl))
+                        @if (obj.ProductImages != null && obj.ProductImages.Count > 0)
                         {
+                            <img class="card-img-top rounded" src="@obj.ProductImages.FirstOrDefault().ImageUrl" alt="Card Book">
                         }
                         else
                         {
-                            <img class="card-img-top rounded" src="@obj.ImageUrl" alt="Card Book">
-                        } *@
+                            <img class="card-img-top rounded" src="~/images//product/no_image.jpg" alt="Card Book">
+                        }
                     </div>
                     <div class="card-body">
                         <div style="height:70px;" class="d-flex flex-column justify-content-center mh-100">
                             <p class="card-title  h4 text-black text-uppercase text-opacity-75">
-                                @obj.Title 
+                                @obj.Title
                             </p>
                         </div>
                         <div>

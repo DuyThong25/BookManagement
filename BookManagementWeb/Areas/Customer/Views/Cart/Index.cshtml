@@ -27,14 +27,14 @@
         {
             <div class="row bg-dark bg-opacity-10 rounded-4 py-3 my-3">
                 <div class="col-md-2 col-2 d-flex align-items-center">
-                @*     @if (!String.IsNullOrEmpty(obj.Product.ImageUrl))
+                    @if (obj.Product.ProductImages != null && obj.Product.ProductImages.Count > 0)
                     {
-                        <img src="@obj.Product.ImageUrl" class="rounded w-100  img-fluid" />
+                        <img src="@obj.Product.ProductImages.FirstOrDefault().ImageUrl" class="rounded w-100 img-fluid" />
                     }
                     else
                     {
-                    } *@
-                        <img src="~/images//product/no_image.jpg" class="rounded w-100  img-fluid" />
+                        <img src="~/images//product/no_image.jpg" class="rounded w-100 img-fluid" />
+                    }
                 </div>
                 <div class="col-md-4 col-3 d-flex flex-column justify-content-center">
                     <h5 class="text-uppercase text-secondary text-truncate"><strong>@obj.Product.Title</strong></h5>
