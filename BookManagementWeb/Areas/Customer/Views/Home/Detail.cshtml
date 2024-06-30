@@ -20,7 +20,7 @@
                         @foreach (var image in Model.Product.ProductImages)
                         {
                             <div>
-                                <img class="w-100 h-100 img-fluid rounded rounded-4 shadow box-shadow" src="@image.ImageUrl" />
+                                <img class="w-100 img-fluid rounded rounded-4 shadow box-shadow" src="@image.ImageUrl" />
                             </div>
                         }
                     </div>
@@ -44,7 +44,7 @@
                 <h1 class="text-black text-uppercase fw-bold">@Model.Product.Title</h1>
                 <p class="text-black-50">by <b>@Model.Product.Author</b></p>
                 <p class="badge m-0">@Model.Product.Category.Name</p>
-                <div style="height:200px; max-height:200px;" class="overflow-auto mb-3">
+                <div style="height:200px; max-height:200px;" class="overflow-auto my-3">
                     <p class="text-secondary ">@Html.Raw(@Model.Product.Description)</p>
                 </div>
                 <div>
@@ -87,7 +87,7 @@
                     </div>
                 </div>
 
-                <div class="row pl-2 my-3">
+                <div class="row pl-2 my-5">
                     <div class="col-md-4">
                         <div class="input-group mb-3">
                             <span class="input-group-text bg-primary text-white border-0 fw-semibold"
@@ -96,14 +96,16 @@
                             </span>
                             <input asp-for="Count" type="number" value="1" min="1" max="1000" class="form-control text-end"
                                    aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" />
-
                         </div>
                     </div>
+                    <div class="col-md-8">
+                        <button type="submit"
+                                class="btn btn-primary bg-gradient  w-100 py-2 text-uppercase fw-semibold">
+                            Add to Cart
+                        </button>
+                    </div>
                 </div>
-                <button type="submit"
-                        class="btn btn-primary bg-gradient  w-100 py-2 text-uppercase fw-semibold">
-                    Add to Cart
-                </button>
+              
             </div>
         </div>
     </div>
