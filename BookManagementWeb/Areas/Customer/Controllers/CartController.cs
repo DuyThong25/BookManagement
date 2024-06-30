@@ -36,7 +36,7 @@ namespace BookManagementWeb.Areas.Customer.Controllers
 
             if (TempData["orderHeaderID"] != null)
             {
-                var orderHeaderFromDB = _unitOfWork.OrderHeader.Get(x => x.Id == TempData["orderHeaderID"] as int?, includeProperties: "ApplicationUsers");
+                var orderHeaderFromDB = _unitOfWork.OrderHeader.Get(x => x.Id == TempData["orderHeaderID"] as int?, includeProperties: "ApplicationUser");
                 if (orderHeaderFromDB.ApplicationUser.CompanyID.GetValueOrDefault() == 0)
                 {
                     // normal customer
