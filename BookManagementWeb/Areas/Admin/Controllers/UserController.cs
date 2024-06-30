@@ -72,11 +72,11 @@ namespace BookManagementWeb.Areas.Admin.Controllers
         {
             string roleID = _db.UserRoles.FirstOrDefault(x => x.UserId == RoleManager.ApplicationUser.Id).RoleId;
             string oldRole = _db.Roles.FirstOrDefault(x => x.Id == roleID).Name;
+            var applicationUser = _db.ApplicationUsers.FirstOrDefault(x => x.Id == RoleManager.ApplicationUser.Id);
 
             // Update happening
             if (RoleManager.ApplicationUser.Role != oldRole)
             {
-                var applicationUser = _db.ApplicationUsers.FirstOrDefault(x => x.Id == RoleManager.ApplicationUser.Id);
                 if (RoleManager.ApplicationUser.Role == StaticDetail.Role_Company)
                 {
                     applicationUser.CompanyID = RoleManager.ApplicationUser.CompanyID;
@@ -95,11 +95,27 @@ namespace BookManagementWeb.Areas.Admin.Controllers
                 _userManager.AddToRoleAsync(applicationUser, RoleManager.ApplicationUser.Role).GetAwaiter().GetResult();
 
                 TempData["success"] = "Update Pemission Successfully.";
-                return RedirectToAction("Index");
+                return RedirectToAction(nameof(Pemission), new { id = RoleManager.ApplicationUser.Id });
+            }
+            else
+            {
+                // If user only change the company && and the change not equal to old company
+                if (oldRole == StaticDetail.Role_Company && applicationUser.CompanyID != RoleManager.ApplicationUser.CompanyID)
+                {
+                    applicationUser.CompanyID = RoleManager.ApplicationUser.CompanyID;
+                    _db.ApplicationUsers.Update(applicationUser);
+                    _db.SaveChanges();
+                    TempData["success"] = "Update Pemission Successfully.";
+                    return RedirectToAction(nameof(Pemission), new { id = RoleManager.ApplicationUser.Id });
+                }else
+                {
+                    TempData["success"] = "Update pemission successfully, but nothing to change.";
+                    return RedirectToAction(nameof(Pemission), new { id = RoleManager.ApplicationUser.Id });
+                }
             }
 
             TempData["error"] = "Update Pemission Fail.";
-            return View(RoleManager);
+            return RedirectToAction(nameof(Pemission), new {id = RoleManager.ApplicationUser.Id});
         }
 
         #region Api Method
