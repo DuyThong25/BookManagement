@@ -1,0 +1,312 @@
+﻿@{
+    ViewData["Title"] = "Order Statistics";
+}
+<div class="container" style="margin-top: -40px">
+    <div class="row text-center">
+        <div class="col-md-12 vh-100 d-flex flex-column justify-content-center">
+            <div class="border border-black border-opacity-10 border-3 shadow p-5 rounded-5 w-100">
+                <div>
+                    <h1>Revenue Of Store</h1>
+                </div>
+                <hr />
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="nav " role="tablist">
+                            <a class="btn nav-link btn-primary" onclick="filterStatistics('weekly', this)">Weekly</a>
+                            <a class="btn nav-link" onclick="filterStatistics('inMonth', this)">In Month</a>
+                            <a class="btn nav-link" onclick="filterStatistics('monthly', this)">Monthly</a>
+                            <a class="btn nav-link" onclick="filterStatistics('yearly', this)">Yearly</a>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <button id="exportButton" class="btn btn-outline-success">
+                            Export Excel
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <canvas id="myChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script lang="javascript" src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <script>
+        var barChart;
+        $.post(
+            `/Admin/OrderStatistic/StatusOrderStatistic/`,
+            {
+                status: `weekly`
+            },
+            (result, status) => {
+                const ctx = document.getElementById('myChart');
+                var labels = result.dateInWeek;
+                var arrOrderTotal = [];
+
+                result.data.forEach((element, index) => {
+                    arrOrderTotal.push(element.orderTotal)
+                });
+
+                var data = {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Revenue of weekly.',
+                        data: arrOrderTotal,
+                        fill: false,
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
+                    }]
+                };
+
+                barChart = new Chart(ctx, {
+                    type: 'bar',
+                    labels: labels,
+                    data: data,
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+        )
+        function filterStatistics(status, element) {
+            // Loại bỏ lớp 'active' khỏi tất cả các tab
+            var tabs = document.querySelectorAll('.nav-link');
+            tabs.forEach(function (tab) {
+                tab.classList.remove('btn-primary');
+            });
+
+            // Thêm lớp 'active' vào tab được chọn
+            element.classList.add('btn-primary');
+
+            $.post(
+                `/Admin/OrderStatistic/StatusOrderStatistic/`,
+                {
+                    status: `${status}`
+                },
+                (result) => {
+                    var arrOrderTotal = [];
+
+                    if (status == 'weekly') {
+                        // Xóa dữ liệu cũ
+                        barChart.data.labels.pop();
+                        barChart.data.datasets.forEach((dataset) => {
+                            dataset.data.pop();
+                        });
+
+                        // Lấy dữ liệu mới từ result
+                        var arrOrderTotal = [];
+                        result.data.forEach((element) => {
+                            arrOrderTotal.push(element.orderTotal);
+                        });
+                        // Thêm dữ liệu mới vào labels và datasets
+                        var labels = result.dateInWeek;
+
+                        barChart.data.labels = labels;
+                        barChart.data.datasets.forEach((dataset) => {
+                            dataset.label = 'Revenue of weekly.'
+                            dataset.data = arrOrderTotal;
+                        });
+
+                        // Cập nhật biểu đồ
+                        barChart.update();
+                    }
+                    else if (status == 'inMonth') {
+                        // Xóa dữ liệu cũ
+                        barChart.data.labels.pop();
+                        barChart.data.datasets.forEach((dataset) => {
+                            dataset.data.pop();
+                        });
+
+                        // Lấy dữ liệu mới từ result
+                        var dateHasValue = [];
+
+                        // Tạo một đối tượng để lưu trữ ngày và tổng doanh thu tương ứng
+                        var groupedData = result.data.reduce(function (acc, curr) {
+                            // Chuyển đổi ngày thành chuỗi "dd-mm-yyyy"
+                            var formattedDate = new Date(curr.orderDate);
+                            var day = formattedDate.getDate();
+                            var month = formattedDate.getMonth() + 1; // getMonth() trả về tháng từ 0 đến 11, nên cần +1
+                            var year = formattedDate.getFullYear();
+
+                            var formattedDateString = `${day}-${month}-${year}`;
+
+                            // Kiểm tra nếu ngày đã tồn tại trong acc
+                            if (acc.hasOwnProperty(formattedDateString)) {
+                                // Tăng tổng doanh thu của ngày đó lên
+                                acc[formattedDateString] += curr.orderTotal;
+                            } else {
+                                // Thêm ngày mới vào acc với tổng doanh thu hiện tại
+                                acc[formattedDateString] = curr.orderTotal;
+                                // Thêm ngày vào mảng labels
+                                dateHasValue.push(formattedDateString);
+                            }
+
+                            return acc;
+                        }, {});
+
+                        // Tạo mảng arrOrderTotal từ groupedData
+                        var arrOrderTotal = dateHasValue.map(function (date) {
+                            return groupedData[date];
+                        });
+
+                        // Thêm dữ liệu mới vào labels và datasets của biểu đồ
+                        var labels = dateHasValue;
+                        console.log(groupedData)
+                        barChart.data.labels = labels;
+                        barChart.data.datasets.forEach((dataset) => {
+                            dataset.label = 'Revenue days of the month.'
+                            dataset.data = arrOrderTotal;
+                        });
+
+                        // Cập nhật biểu đồ
+                        barChart.update();
+                    }
+                    else if (status == 'monthly') {
+                        // Xóa dữ liệu cũ
+                        barChart.data.labels.pop();
+                        barChart.data.datasets.forEach((dataset) => {
+                            dataset.data.pop();
+                        });
+
+                        // Lấy dữ liệu mới từ result
+                        var monthlyOrderTotal = {};
+                        var dateHasValue = [];
+
+                        result.data.forEach((element) => {
+                            // Chuyển đổi ngày thành chuỗi "MM-yyyy"
+                            var orderDate = new Date(element.orderDate);
+                            var month = orderDate.getMonth(); // getMonth() trả về tháng từ 0 đến 11, nên cần +1
+                            var year = orderDate.getFullYear();
+
+                            // Định dạng lại thành "MM-yyyy"
+                            var formattedMonthString = result.monthInYear[month];
+
+                            // Kiểm tra nếu tháng đã tồn tại trong monthlyOrderTotal
+                            if (monthlyOrderTotal.hasOwnProperty(formattedMonthString)) {
+                                // Tăng tổng doanh thu của tháng đó lên
+                                monthlyOrderTotal[formattedMonthString] += element.orderTotal;
+                            } else {
+                                // Thêm tháng mới vào monthlyOrderTotal với tổng doanh thu hiện tại
+                                monthlyOrderTotal[formattedMonthString] = element.orderTotal;
+                                // Thêm tháng vào mảng labels
+                                dateHasValue.push(formattedMonthString);
+                            }
+                        });
+
+                        // Tạo mảng arrOrderTotal từ monthlyOrderTotal
+                        var arrOrderTotal = dateHasValue.map(function (date) {
+                            return monthlyOrderTotal[date];
+                        });
+
+                        // Thêm dữ liệu mới vào labels và datasets của biểu đồ
+                        var labels = dateHasValue;
+
+                        barChart.data.labels = labels;
+                        barChart.data.datasets.forEach((dataset) => {
+                            dataset.label = 'Revenue in monthly.'
+                            dataset.data = arrOrderTotal;
+                        });
+
+                        // Cập nhật biểu đồ
+                        barChart.update();
+                    } else {
+                        // yearly
+                        // Xóa dữ liệu cũ
+                        barChart.data.labels.pop();
+                        barChart.data.datasets.forEach((dataset) => {
+                            dataset.data.pop();
+                        });
+
+                        // Lấy dữ liệu mới từ result
+                        var yearlyOrderTotal = [];
+                        var yearlyLabels = [];
+
+                        result.data.forEach((element) => {
+                            yearlyLabels.push(element.year);
+                            yearlyOrderTotal.push(element.totalOrder);
+                        });
+
+                        // Thêm dữ liệu mới vào labels và datasets của biểu đồ
+                        var labels = yearlyLabels;
+
+                        barChart.data.labels = labels;
+                        barChart.data.datasets.forEach((dataset) => {
+                            dataset.label = 'Revenue in yearly.'
+                            dataset.data = yearlyOrderTotal;
+                        });
+
+                        // Cập nhật biểu đồ
+                        barChart.update();
+                    }
+                }
+
+            )
+
+        }
+
+        // Function to export chart data to Excel
+        // Function to export chart data to Excel
+        function exportChartDataToExcel(chart, fileName) {
+            // Get the chart data
+            var labels = chart.data.labels;
+            var dataset = chart.data.datasets[0].data;
+
+            // Create a worksheet with the main title and header rows
+            var ws_data = [
+                ['Revenue of store'],   // Main title row
+                ['Date', 'Order Total'] // Header row
+            ];
+
+            // Append the data to the worksheet data array
+            labels.forEach((label, index) => {
+                ws_data.push([label, dataset[index]]);
+            });
+
+            // Convert the data array to a worksheet
+            var ws = XLSX.utils.aoa_to_sheet(ws_data);
+
+            // Merge the cells for the title across the first two columns
+            ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 1 } }];
+
+            // Apply cell styles
+            var wscols = [
+                { wch: 20 }, // Column width for 'Date'
+                { wch: 20 }  // Column width for 'Order Total'
+            ];
+
+            ws['!cols'] = wscols;
+            // Set cell style for the main title
+            ws['A1'].s = {
+                font: {
+                    sz: 32, // Font size
+                    bold: true // Bold font
+                },
+                alignment: {
+                    horizontal: 'center', // Center horizontally
+                    vertical: 'center'    // Center vertically
+                }
+            };
+
+            // Create a workbook and append the worksheet
+            var wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Order Data');
+
+            // Write the workbook and trigger the download
+            XLSX.writeFile(wb, fileName);
+        }
+
+        // Example usage with a button click
+        document.getElementById('exportButton').addEventListener('click', function () {
+            exportChartDataToExcel(barChart, 'Revenue-Data.xlsx');
+        });
+    </script>
+}
