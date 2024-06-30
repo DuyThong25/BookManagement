@@ -34,11 +34,15 @@ namespace BookManagementWeb.Areas.Customer.Controllers
             var claimsIdentity = User.Identity as ClaimsIdentity;
             var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
 
-            if(TempData["orderHeaderID"] != null)
+            if (TempData["orderHeaderID"] != null)
             {
-                var orderHeaderFromDB = _unitOfWork.OrderHeader.Get(x => x.Id == TempData["orderHeaderID"] as int?);
-                _unitOfWork.OrderHeader.Remove(orderHeaderFromDB);
-                _unitOfWork.Save();
+                var orderHeaderFromDB = _unitOfWork.OrderHeader.Get(x => x.Id == TempData["orderHeaderID"] as int?, includeProperties: "ApplicationUser");
+                if (orderHeaderFromDB.ApplicationUser.CompanyID.GetValueOrDefault() == 0)
+                {
+                    // normal customer
+                    _unitOfWork.OrderHeader.Remove(orderHeaderFromDB);
+                    _unitOfWork.Save();
+                }
             }
             ShoppingCartVM = new()
             {
@@ -211,13 +215,13 @@ namespace BookManagementWeb.Areas.Customer.Controllers
                         _unitOfWork.OrderHeader.UpdateStatus(id, StaticDetail.OrderStatus_Approved, StaticDetail.PaymentStatus_Approved);
                         _unitOfWork.Save();
 
-                        //Send Mail After Payment APPROVED
-                        string teamplate = TemplateEmailConfirmOrder(orderHeaderFromDB);
-                        _emailSender.SendEmailAsync(orderHeaderFromDB.ApplicationUser.Email
-                            , $"Thank you for your order - Your Order is {orderHeaderFromDB.Id}"
-                            , teamplate);
                     }
                 }
+                //Send Mail After Payment APPROVED
+                string teamplate = TemplateEmailConfirmOrder(orderHeaderFromDB);
+                _emailSender.SendEmailAsync(orderHeaderFromDB.ApplicationUser.Email
+                    , $"Thank you for your order - Your Order is {orderHeaderFromDB.Id}"
+                    , teamplate);
             }
 
             //Clear cart

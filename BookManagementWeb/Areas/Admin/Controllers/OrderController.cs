@@ -50,6 +50,7 @@ namespace BookManagementWeb.Areas.Admin.Controllers
                 orderHeaderFromDB.Ward = OrderVM.OrderHeader.Ward;
                 orderHeaderFromDB.District = OrderVM.OrderHeader.District;
                 orderHeaderFromDB.City = OrderVM.OrderHeader.City;
+                orderHeaderFromDB.Carrier = OrderVM.OrderHeader.Carrier;
                 if (OrderVM.OrderHeader.SessionId == null)
                 {
                     orderHeaderFromDB.PaymentDueDate = OrderVM.OrderHeader.PaymentDueDate;
