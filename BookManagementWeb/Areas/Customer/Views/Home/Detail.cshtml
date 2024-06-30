@@ -13,20 +13,32 @@
                     <i class="bi bi-caret-left"></i> Back to Home
                 </a>
             </div>
-            <div class="col-md-6 col-lg-5 d-none d-md-block">
-                <div class="pe-4">
-                    @* <img src="https://placehold.co/500x600" width="100" class="rounded" /> *@
-                  @*   @if (!String.IsNullOrEmpty(@Model.Product.ImageUrl))
-                    {
-                        <img class="w-100 h-100 img-fluid rounded rounded-top-2 rounded-bottom-5 " src="@Model.Product.ImageUrl" />
-                    }
-                    else
-                    {
-                    } *@
-                        <div class="border border-1 border-black border-opacity-10 shadow rounded rounded-top-2 rounded-bottom-5 ">
-                            <img class="w-100 h-100 img-fluid rounded rounded-top-2 rounded-bottom-5 " src="~/images/product/no_image.jpg" />
-                        </div>
-                </div>
+            <div class="col-md-6 col-lg-5">
+                @if (Model.Product.ProductImages != null && Model.Product.ProductImages.Count > 0)
+                {
+                    <div class="slider-for mx-2 mb-4 me-2">
+                        @foreach (var image in Model.Product.ProductImages)
+                        {
+                            <div>
+                                <img class="w-100 h-100 img-fluid rounded rounded-4 shadow box-shadow" src="@image.ImageUrl" />
+                            </div>
+                        }
+                    </div>
+                    <div class="slider-nav me-2">
+                        @foreach (var image in Model.Product.ProductImages)
+                        {
+                            <div>
+                                <img class="w-75 h-75 p-2 rounded rounded-4 img-fluid shadow box-shadow" src="@image.ImageUrl" />
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="border border-1 border-black border-opacity-10 shadow rounded rounded-top-2 rounded-bottom-5 ">
+                        <img class="w-100 h-100 img-fluid rounded rounded-top-2 rounded-bottom-5 " src="~/images/product/no_image.jpg" />
+                    </div>
+                }
             </div>
             <div class="col-md-6 col-lg-7">
                 <h1 class="text-black text-uppercase fw-bold">@Model.Product.Title</h1>
@@ -97,3 +109,31 @@
     </div>
 </form>
 
+@section Scripts {
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.slider-for').slick({
+                slidesToShow: 1,
+                slidesToScroll: 1,
+                arrows: true,
+                fade: true,
+                asNavFor: '.slider-nav',
+                infinite: true,
+                speed: 500,
+                autoplay: true,
+                autoplaySpeed: 4000,
+            });
+            $('.slider-nav').slick({
+                slidesToShow: 1,
+                slidesToScroll: 1,
+                asNavFor: '.slider-for',
+                dots: true,
+                centerMode: true,
+                arrows: true,
+                centerPadding: '140px',
+                focusOnSelect: true,
+            });
+        });
+    </script>
+}
