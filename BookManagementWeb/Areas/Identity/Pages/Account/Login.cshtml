@@ -40,7 +40,7 @@
                         </div>
                     </div>
                     <div>
-                        <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary">Log in</button>
+                        <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary fw-bold">Log in</button>
                     </div>
                 </form>
 
@@ -68,12 +68,19 @@
                             <div>
                                 @foreach (var provider in Model.ExternalLogins!)
                                 {
+                                    var color = "";
                                     if (@provider.DisplayName == "Facebook")
                                     {
-                                        <button type="submit" class="w-100 btn p-2 " style="background: #3B5998;" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">
-                                            <span class="text-white">@provider.DisplayName</span>
-                                        </button>
+                                        color = "background: #3B5998;";
                                     }
+                                    if (@provider.DisplayName == "Google")
+                                    {
+                                        color = "background: #EA4335;";
+                                    }
+
+                                    <button type="submit" class="w-100 btn p-2 my-2 " style="@color" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">
+                                        <h6 class="text-white ">@provider.DisplayName</h6>
+                                    </button>
                                 }
                             </div>
                         </form>
