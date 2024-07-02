@@ -8,6 +8,7 @@ using BookManager.Utility;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Stripe;
 using BookManager.DataAccess.DbInitializer;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,12 +40,20 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 });
 
-builder.Services.AddAuthentication().AddFacebook(options =>
-{
-    options.AppId = "1189090972275934";
-    options.AppSecret = "fd86a02f696627b95ab05aa3099cc784";
-    options.AccessDeniedPath = "/Identity/Account/Login";
-});
+builder.Services.AddAuthentication()
+    .AddFacebook(options =>
+    {
+        options.AppId = builder.Configuration.GetSection("FacebookLogin:AppId").Get<string>();
+        options.AppSecret = builder.Configuration.GetSection("FacebookLogin:AppSecret").Get<string>();
+        options.AccessDeniedPath = "/Identity/Account/Login";
+    })
+    .AddGoogle(googleOptions =>
+    {
+        googleOptions.ClientId = builder.Configuration.GetSection("GoogleLogin:ClientId").Get<string>();
+        googleOptions.ClientSecret = builder.Configuration.GetSection("GoogleLogin:ClientSecret").Get<string>();
+        googleOptions.AccessDeniedPath = "/Identity/Account/Login";
+    });
+
 
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
 builder.Services.AddScoped<IDbinitializer, Dbinitializer>();
