@@ -11,6 +11,7 @@ namespace BookManager.Models.ViewModel
         public IEnumerable<Product> Products { get; set; }
         public IEnumerable<Category> Categories{ get; set; }
         public List<int> SelectedCategoryIds { get; set; }
+        public List<int> RangerPrice { get; set; }
         public string SearchInput {  get; set; }
     }
 }
