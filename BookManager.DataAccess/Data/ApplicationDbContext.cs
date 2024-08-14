@@ -1,4 +1,5 @@
 ﻿using BookManager.Models;
+using BookManager.Models.PaymentGate;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -16,14 +17,16 @@ namespace BookManager.DataAccess.Data
         public DbSet<Company> Companies { get; set; }
         public DbSet<ShoppingCart> ShoppingCarts { get; set; }
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
-		public DbSet<OrderHeader> OrderHeaders { get; set; }
-		public DbSet<OrderDetail> OrderDetails { get; set; }
-		public DbSet<ProductImage> ProductImages { get; set; }
+        public DbSet<OrderHeader> OrderHeaders { get; set; }
+        public DbSet<OrderDetail> OrderDetails { get; set; }
+        public DbSet<ProductImage> ProductImages { get; set; }
+        public DbSet<PaymentTransaction> PaymentTransactions { get; set; }
+        public DbSet<PaymentType> PaymentTypes { get; set; }
 
 
-		// OnModelCreating Sử dụng để tạo dữ liệu cho csdl và 
-		// Sử dụng migration để truyền dữ liệu xuống cho database
-		protected override void OnModelCreating(ModelBuilder modelBuilder)
+        // OnModelCreating Sử dụng để tạo dữ liệu cho csdl và 
+        // Sử dụng migration để truyền dữ liệu xuống cho database
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
@@ -32,7 +35,7 @@ namespace BookManager.DataAccess.Data
                     new Category { CategoryId = 2, Name = "Fiction", DisplayOrder = 2 },
                     new Category { CategoryId = 3, Name = "History", DisplayOrder = 3 }
                 );
-			modelBuilder.Entity<Product>().HasData(
+            modelBuilder.Entity<Product>().HasData(
                 new Product
                 {
                     ProductId = 1,
@@ -111,6 +114,10 @@ namespace BookManager.DataAccess.Data
                     Price100 = 20,
                     CategoryId = 3,
                 });
+            modelBuilder.Entity<PaymentType>().HasData(
+                new PaymentType { Id = 1, Name = "Stripe", Alias = "Stripe payment gateway", IsActive = true },
+                new PaymentType { Id = 2, Name = "MoMo", Alias = "MoMo payment gateway", IsActive = true }
+                );
         }
 
     }
