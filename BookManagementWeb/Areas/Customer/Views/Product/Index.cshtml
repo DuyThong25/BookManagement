@@ -1,24 +1,92 @@
-﻿@{
+﻿@model ProductFilterVM
+@{
     ViewData["Title"] = "Product Page";
 }
 
-<div class="container">
+<style>
+    .ui-slider .ui-slider-range {
+        background-color: #2C3E50;
+    }
+
+    .ui-slider-horizontal .ui-slider-handle{
+        border-radius:25px;
+    }
+</style>
+<div class="container border border-1 border-black border-opacity-10 box-shadow shadow bg-white p-3 rounded-2">
     <div class="row">
-        <div class="col-md-3">
-            <div>
-                <div class="card">
-                    <a class="collapsed btn" data-bs-toggle="collapse" href="#collapseThree">
-                        Category
-                    </a>
-                    <div id="collapseThree" class="collapse" data-bs-parent="#accordion">
-                        <div class="card-body">
-                            Lorem ipsum..
+        <div class="col-md-3 col-xl-2">
+            @* Search Product*@
+            @*   <div>
+            <label class="form-label">Search Product</label>
+            <input class="border border-1 border-black border-opacity-50 my-2 rounded rounded-1 p-1" />
+            <span class="text-danger"></span>
+            </div> *@
+            @*  <hr class="my-4" /> *@
+            @* Filter Category*@
+            <div class="accordion accordion-flush border-bottom border-1 border-black border-opacity-10 pb-2">
+                <div class="accordion-item">
+                    <h2 class="accordion-header br" id="flush-headingOne">
+                        <button class="accordion-button collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
+                            Category
+                        </button>
+                    </h2>
+                    <div id="flush-collapseOne" class="accordion-collapse collapse" aria-labelledby="flush-headingOne" data-bs-parent="#accordionFlushExample">
+                        <div class="accordion-body px-2">
+                            @foreach (var category in Model.Categories)
+                            {
+                                <div>
+                                    <input type="checkbox" value="@category.CategoryId" name="SelectedCategoryIds" />
+                                    <label>@category.Name</label>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @* Filter Price *@
+            <div class="accordion accordion-flush border-bottom border-1 border-black border-opacity-10 pb-2 mt-4">
+                <div class="accordion-item">
+                    <h2 class="accordion-header br" id="flush-headingTwo">
+                        <button class="accordion-button collapsed p-2" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseTwo" aria-expanded="false" aria-controls="flush-collapseTwo">
+                            Price Range
+                        </button>
+                    </h2>
+                    <div id="flush-collapseTwo" class="accordion-collapse collapse" aria-labelledby="flush-headingTwo" data-bs-parent="#accordionFlushExample">
+                        <div class="accordion-body px-2">
+                            @* <input type="range" id="priceRange" value="0" min="0" max="100" step="50" class="form-range my-1" />
+                            <ul class="list-group list-group-horizontal d-flex justify-content-between">
+                            <li class="list-group-item p-0 border-0 fw-bold text-secondary">All</li>
+                            <li class="list-group-item p-0 border-0 ">50$</li>
+                            <li class="list-group-item p-0 border-0 ">100$</li>
+                            </ul> *@
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <label id="minPrice" value />
+                                </div>
+                                <div>
+                                    <label id="maxPrice" />
+                                </div>
+                            </div>
+                            <div id="slider-range" class="mt-2"></div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-9">
+        <div class="col-md-9 col-xl-10">
+            <div id="partial-background" class="row">
+                <div class="col-md-6">
+                    <div class="input-group w-100">
+                        <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                        <input id="SearchInput" type="text" class="form-control" placeholder="Title book.." />
+                    </div>
+                </div>
+            </div>
+            @await Html.PartialAsync("_ProductsFilterPartial", Model)
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/Products/CustomerProduct.js"></script>
+}
