@@ -1,0 +1,83 @@
+﻿@using BookManager.Models.PaymentGate
+@model List<PaymentType>;
+@{
+    ViewData["Title"] = "Index Payment";
+}
+<!-- Thêm CSS và JS của Switchery -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/switchery/0.8.2/switchery.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/switchery/0.8.2/switchery.min.js"></script>
+
+<div class="container">
+    <div class="card shadow border-1 mt-4">
+        <div class="card-header bg-primary bg-gradient  py-3">
+            <div class="row">
+                <div class="col-12 text-center text-white">
+                    <h2>List Payment</h2>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="container-fluid mb-3">
+                <div class="row">
+                    <div class="col-12 text-start p-0">
+                        @* <a asp-controller="Product" asp-action="CreateOrUpdate" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Create new Book
+                        </a> *@
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table id="myTable" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th class="text-center">Name</th>
+                            <th class="text-center">Alias</th>
+                            <th class="text-center">Display</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (PaymentType item in Model)
+                        {
+                            <tr data-id="@item.Id">
+                                <td class="text-center">@item.Name</td>
+                                <td class="text-center">@item.Alias</td>
+                                <td class="text-center">
+                                    <input type="checkbox" class="js-switch" @(item.IsActive == true ? "checked" : "") />
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Khởi tạo switch button
+        Array.from(document.querySelectorAll('.js-switch')).forEach(function (html) {
+            var switchery = new Switchery(html);
+            html.onchange = (e) => {
+                var paymentTypeId = e.target.parentElement.parentElement.dataset.id;
+                var status = e.target.checked;
+                $.post(
+                    'PaymentGateway/ChangeDisplayStatus',
+                    {
+                        paymentTypeId: paymentTypeId,
+                        status: status
+                    },
+                    (data) => {
+                        if (data.success) {
+                            console.log(data.message);
+                            ShowSuccessToast(`${data.message}`)
+                        } else {
+                            console.log(data.message);
+                            ShowErrorToast(`${data.message}`)
+                        }
+                    }
+                )
+            }
+        });
+    </script>
+}

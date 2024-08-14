@@ -74,6 +74,9 @@
                                         <li>
                                             <a class="dropdown-item" asp-area="Admin" asp-controller="User" asp-action="Index">Manage User</a>
                                         </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-area="Admin" asp-controller="PaymentGateway" asp-action="Index">Payment Type</a>
+                                        </li>
                                     }
                                     @*  <li><a class="dropdown-item" href="#">Action</a></li>
                                 <li><a class="dropdown-item" href="#">Another action</a></li>
@@ -109,6 +112,8 @@
     @* Jquery code *@
     <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    @* Notification *@
+    <partial name="_NotificationPartial"></partial>
     @* tiny mce *@
     <script src="https://cdn.tiny.cloud/1/mje125hw4jwx3yoyky6uxzf0bt0lxso7ge3a4da39q8kut7n/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
     @* Data table - Sweart Alrte *@
