@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace BookManager.DataAccess.Repository.IRepository
 {
-    public interface IPaymentType : IRepository<IPaymentType>
+    public interface IPaymentType : IRepository<PaymentType>
     {
         void Update(PaymentType obj);
     }

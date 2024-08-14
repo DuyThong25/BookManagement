@@ -16,6 +16,8 @@ namespace BookManager.DataAccess.Repository.IRepository
 		IOrderHeaderRepository OrderHeader { get; }
 		IOrderDetailRepository OrderDetail { get; }
 		IProductImageRepository ProductImage { get; }
+		IPaymentType PaymentType { get; }
+		IPaymentTransaction PaymentTransaction { get; }
 
 		void Save();
 
