@@ -25,14 +25,14 @@ namespace BookManagementWeb.Areas.Admin.Controllers
 
         public IActionResult Index()
         {
-            return View(_unitOfWork.OrderHeader.GetAll(includeProperties: "ApplicationUser"));
+            return View(_unitOfWork.OrderHeader.GetAll(includeProperties: "ApplicationUser", orderByDescending: x => x.Id));
         }
 
         public IActionResult Details(int orderId)
         {
             OrderVM = new()
             {
-                OrderHeader = _unitOfWork.OrderHeader.Get(x => x.Id == orderId, includeProperties: "ApplicationUser"),
+                OrderHeader = _unitOfWork.OrderHeader.Get(x => x.Id == orderId, includeProperties: "ApplicationUser,PaymentTransaction"),
                 OrderDetails = _unitOfWork.OrderDetail.GetAll(x => x.OrderHeaderId == orderId, includeProperties: "Product").ToList()
             };
             return View(OrderVM);
@@ -41,7 +41,7 @@ namespace BookManagementWeb.Areas.Admin.Controllers
         [HttpPost]
         public IActionResult UpdateOrderDetails()
         {
-            var orderHeaderFromDB = _unitOfWork.OrderHeader.Get(x => x.Id == OrderVM.OrderHeader.Id, includeProperties: "ApplicationUser");
+            var orderHeaderFromDB = _unitOfWork.OrderHeader.Get(x => x.Id == OrderVM.OrderHeader.Id, includeProperties: "ApplicationUser,PaymentTransaction");
             if (orderHeaderFromDB != null)
             {
                 orderHeaderFromDB.Name = OrderVM.OrderHeader.Name;
@@ -51,7 +51,7 @@ namespace BookManagementWeb.Areas.Admin.Controllers
                 orderHeaderFromDB.District = OrderVM.OrderHeader.District;
                 orderHeaderFromDB.City = OrderVM.OrderHeader.City;
                 orderHeaderFromDB.Carrier = OrderVM.OrderHeader.Carrier;
-                if (OrderVM.OrderHeader.SessionId == null)
+                if (OrderVM.OrderHeader.PaymentTransaction.SessionId == null)
                 {
                     orderHeaderFromDB.PaymentDueDate = OrderVM.OrderHeader.PaymentDueDate;
                 }
@@ -124,13 +124,13 @@ namespace BookManagementWeb.Areas.Admin.Controllers
         [HttpPost("admin/order/CancelOrRefundOrder/{orderHeaderId}")]
         public IActionResult CancelOrRefundOrder(int orderHeaderId)
         {
-            var orderHeaderFromDB = _unitOfWork.OrderHeader.Get(x => x.Id == orderHeaderId);
-            if(orderHeaderFromDB.PaymentStatus == StaticDetail.PaymentStatus_Approved && orderHeaderFromDB.PaymentIntentId != null)
+            var orderHeaderFromDB = _unitOfWork.OrderHeader.Get(x => x.Id == OrderVM.OrderHeader.Id, includeProperties: "ApplicationUser,PaymentTransaction");
+            if (orderHeaderFromDB.PaymentStatus == StaticDetail.PaymentStatus_Approved && orderHeaderFromDB.PaymentTransaction.PaymentIntentId != null)
             {
                 var options = new RefundCreateOptions
                 {
                     Reason = RefundReasons.RequestedByCustomer,
-                    PaymentIntent = orderHeaderFromDB.PaymentIntentId,
+                    PaymentIntent = orderHeaderFromDB.PaymentTransaction.PaymentIntentId,
                 };
 
                 var services = new RefundService();
@@ -156,29 +156,22 @@ namespace BookManagementWeb.Areas.Admin.Controllers
         public IActionResult StatusOrder(string status)
         {
             IEnumerable<OrderHeader> listOrderHeader;
-            switch (status)
+            var statusMapping = new Dictionary<string, string>()
             {
-                case "approved":
-                    listOrderHeader = _unitOfWork.OrderHeader
-                        .GetAll(x => x.OrderStatus == StaticDetail.OrderStatus_Approved, includeProperties: "ApplicationUser").ToList();
-                    break;
-                case "completed":
-                    listOrderHeader = _unitOfWork.OrderHeader
-                        .GetAll(x => x.OrderStatus == StaticDetail.OrderStatus_Shipped, includeProperties: "ApplicationUser").ToList();
-                    break;
-                case "inprocess":
-                    listOrderHeader = _unitOfWork.OrderHeader
-                        .GetAll(x => x.OrderStatus == StaticDetail.OrderStatus_Processing, includeProperties: "ApplicationUser").ToList();
-                    break;
-                case "pending":
-                    listOrderHeader = _unitOfWork.OrderHeader
-                        .GetAll(x => x.OrderStatus == StaticDetail.OrderStatus_Pending, includeProperties: "ApplicationUser").ToList();
-                    break;
-                default:
-                    // All
-                    listOrderHeader = _unitOfWork.OrderHeader.GetAll(includeProperties: "ApplicationUser").ToList();
-                    break;
+                { "approved", StaticDetail.OrderStatus_Approved },
+                { "completed", StaticDetail.OrderStatus_Shipped },
+                { "inprocess", StaticDetail.OrderStatus_Processing },
+                { "pending", StaticDetail.OrderStatus_Pending }
+            };
+            if (statusMapping.TryGetValue(status, out string orderStatus))
+            {
+                listOrderHeader = _unitOfWork.OrderHeader
+                                .GetAll(x => x.OrderStatus == orderStatus, includeProperties: "ApplicationUser", orderByDescending: x => x.Id);
             }
+            else
+            {
+                listOrderHeader = _unitOfWork.OrderHeader.GetAll(includeProperties: "ApplicationUser", orderByDescending: x => x.Id);
+            }        
             return Json(new { data = listOrderHeader });
         }
 

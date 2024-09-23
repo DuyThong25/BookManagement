@@ -1,6 +1,7 @@
 ﻿using BookManager.DataAccess.Data;
 using BookManager.DataAccess.Repository.IRepository;
 using BookManager.Models;
+using BookManager.Models.PaymentGate;
 using BookManager.Models.ViewModel;
 using BookManager.Utility;
 using Microsoft.AspNetCore.Authorization;
@@ -125,6 +126,14 @@ namespace BookManagementWeb.Areas.Customer.Controllers
                 var claimsIdentity = User.Identity as ClaimsIdentity;
                 var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
 
+                // Adding transaction table
+                ShoppingCartVM.PaymentTransaction = new()
+                {
+                    PaymentTypeId = ShoppingCartVM.OrderHeader.PaymentTypeId,
+                };
+                _unitOfWork.PaymentTransaction.Add(ShoppingCartVM.PaymentTransaction);
+                _unitOfWork.Save();
+
                 ShoppingCartVM.ShoppingCartList = _unitOfWork.ShoppingCart.GetAll(x => x.ApplicationUserId == userId, includeProperties: "Product");
                 ApplicationUser applicationUser = _unitOfWork.ApplicationUser.Get(x => x.Id == userId);
                 foreach (var cart in ShoppingCartVM.ShoppingCartList)
@@ -149,6 +158,7 @@ namespace BookManagementWeb.Areas.Customer.Controllers
                     ShoppingCartVM.OrderHeader.OrderStatus = StaticDetail.OrderStatus_Approved;
                     ShoppingCartVM.OrderHeader.PaymentStatus = StaticDetail.PaymentStatus_ApprovedForDelayedPayment;
                 }
+                ShoppingCartVM.OrderHeader.PaymentTransactionId = ShoppingCartVM.PaymentTransaction.Id;
                 _unitOfWork.OrderHeader.Add(ShoppingCartVM.OrderHeader);
                 _unitOfWork.Save();
 
@@ -169,41 +179,67 @@ namespace BookManagementWeb.Areas.Customer.Controllers
                 // qua trinh thanh toan cua normal customer
                 if (applicationUser.CompanyID.GetValueOrDefault() == 0)
                 {
-                    var domain = Request.Scheme + "://" + Request.Host.Value + "/" /*"https://localhost:7121/"*/;
-                    var options = new Stripe.Checkout.SessionCreateOptions
+                    PaymentType paymentType = _unitOfWork.PaymentType.Get(x => x.Id == ShoppingCartVM.OrderHeader.PaymentTypeId);
+                    if (paymentType != null)
                     {
-                        SuccessUrl = domain + $"customer/cart/OrderConfirmation?id={ShoppingCartVM.OrderHeader.Id}",
-                        CancelUrl = domain + "customer/cart/index",
-                        LineItems = new List<Stripe.Checkout.SessionLineItemOptions>(),
-                        Mode = "payment",
-                    };
-                    TempData["orderHeaderID"] = ShoppingCartVM.OrderHeader.Id;
-                    // configure san pham trong gio hang
-                    foreach (var cart in ShoppingCartVM.ShoppingCartList)
-                    {
-                        var sessionLineItem = new SessionLineItemOptions
+                        switch (paymentType.Name)
                         {
-                            PriceData = new SessionLineItemPriceDataOptions
-                            {
-                                UnitAmount = (long)(cart.Price * 100), // $20.5 => 2500
-                                Currency = "usd",
-                                ProductData = new SessionLineItemPriceDataProductDataOptions
+                            case StaticDetail.PaymentType_Name_Stripe:
                                 {
-                                    Name = cart.Product.Title,
-                                }
-                            },
-                            Quantity = cart.Count
-                        };
-                        options.LineItems.Add(sessionLineItem);
-                    }
+                                    var domain = Request.Scheme + "://" + Request.Host.Value + "/" /*"https://localhost:7121/"*/;
+                                    var options = new Stripe.Checkout.SessionCreateOptions
+                                    {
+                                        SuccessUrl = domain + $"customer/cart/OrderConfirmation?id={ShoppingCartVM.OrderHeader.Id}",
+                                        CancelUrl = domain + "customer/cart/index",
+                                        LineItems = new List<Stripe.Checkout.SessionLineItemOptions>(),
+                                        Mode = "payment",
+                                    };
+                                    TempData["orderHeaderID"] = ShoppingCartVM.OrderHeader.Id;
+                                    // configure san pham trong gio hang
+                                    foreach (var cart in ShoppingCartVM.ShoppingCartList)
+                                    {
+                                        var sessionLineItem = new SessionLineItemOptions
+                                        {
+                                            PriceData = new SessionLineItemPriceDataOptions
+                                            {
+                                                UnitAmount = (long)(cart.Price * 100), // $20.5 => 2500
+                                                Currency = "usd",
+                                                ProductData = new SessionLineItemPriceDataProductDataOptions
+                                                {
+                                                    Name = cart.Product.Title,
+                                                }
+                                            },
+                                            Quantity = cart.Count
+                                        };
+                                        options.LineItems.Add(sessionLineItem);
+                                    }
 
-                    var service = new Stripe.Checkout.SessionService();
-                    Session session = service.Create(options);
-                    _unitOfWork.OrderHeader.UpdateStripePaymentID(ShoppingCartVM.OrderHeader.Id, session.Id, session.PaymentIntentId); // PaymentIntentId = null vì chua hoan tat thanh toan
-                    _unitOfWork.Save();
-                    // Chuyen den trang checkout
-                    Response.Headers.Add("Location", session.Url);
-                    return new StatusCodeResult(303);
+                                    var service = new Stripe.Checkout.SessionService();
+                                    Session session = service.Create(options);
+                                    //_unitOfWork.OrderHeader.UpdateStripePaymentID(ShoppingCartVM.OrderHeader.Id, session.Id, session.PaymentIntentId); // PaymentIntentId = null vì chua hoan tat thanh toan
+                                    ShoppingCartVM.PaymentTransaction = _unitOfWork.PaymentTransaction.Get(x => x.Id == ShoppingCartVM.OrderHeader.PaymentTransactionId);
+                                    ShoppingCartVM.PaymentTransaction.SessionId = session.Id;
+                                    ShoppingCartVM.PaymentTransaction.PaymentIntentId = session.PaymentIntentId;
+
+                                    _unitOfWork.PaymentTransaction.Update(ShoppingCartVM.PaymentTransaction);
+                                    _unitOfWork.Save();
+                                    // Chuyen den trang checkout
+                                    Response.Headers.Add("Location", session.Url);
+                                    return new StatusCodeResult(303);
+                                }
+                            case StaticDetail.PaymentType_Name_MoMo:
+                                {
+
+                                    break;
+                                }
+
+                        }
+
+                    }
+                    else
+                    {
+                        throw new Exception();
+                    }
                 }
                 return RedirectToAction(nameof(OrderConfirmation), new { id = ShoppingCartVM.OrderHeader.Id });
             }
@@ -217,26 +253,37 @@ namespace BookManagementWeb.Areas.Customer.Controllers
         {
             using var transaction = _db.Database.BeginTransaction();
             // Cap nhat OrderStatus va PaymentIntendID
-            var orderHeaderFromDB = _unitOfWork.OrderHeader.Get(u => u.Id == id, includeProperties: "ApplicationUser");
+            var orderHeaderFromDB = _unitOfWork.OrderHeader.Get(u => u.Id == id, includeProperties: "ApplicationUser,PaymentTransaction");
             try
             {
                 if (orderHeaderFromDB != null)
                 {
-                    if (!String.IsNullOrEmpty(orderHeaderFromDB.SessionId))
+                    if (!String.IsNullOrEmpty(orderHeaderFromDB.PaymentTransaction.SessionId))
                     {
                         var service = new SessionService();
-                        Session session = service.Get(orderHeaderFromDB.SessionId);
+                        Session session = service.Get(orderHeaderFromDB.PaymentTransaction.SessionId);
                         if (session.PaymentStatus.ToLower() == "paid")
                         {
-                            _unitOfWork.OrderHeader.UpdateStripePaymentID(id, session.Id, session.PaymentIntentId);
-                            _unitOfWork.OrderHeader.UpdateStatus(id, StaticDetail.OrderStatus_Approved, StaticDetail.PaymentStatus_Approved);
+                            //_unitOfWork.OrderHeader.UpdateStripePaymentID(id, session.Id, session.PaymentIntentId);
+                            orderHeaderFromDB.PaymentTransaction.SessionId = session.Id;
+                            orderHeaderFromDB.PaymentTransaction.PaymentIntentId = session.PaymentIntentId;
+                            // Normal Customer
+                            if (orderHeaderFromDB.ApplicationUser.CompanyID.GetValueOrDefault() == 0)
+                            {
+                                _unitOfWork.OrderHeader.UpdateStatus(id, StaticDetail.OrderStatus_Approved, StaticDetail.PaymentStatus_Approved);
+                            }
+                            else
+                            {
+                                _unitOfWork.OrderHeader.UpdateStatus(id, StaticDetail.OrderStatus_Shipped, StaticDetail.PaymentStatus_Approved);
+                            }
                             _unitOfWork.Save();
 
                             //Send Mail After Payment APPROVED
                             string teamplate = TemplateEmailConfirmOrder(orderHeaderFromDB);
-                            _emailSender.SendEmailAsync(orderHeaderFromDB.ApplicationUser.Email
+                            Task.Run(() => _emailSender.SendEmailAsync(orderHeaderFromDB.ApplicationUser.Email
                                 , $"Thank you for your order - Your Order is {orderHeaderFromDB.Id}"
-                                , teamplate);
+                                , teamplate));
+
                             //Clear cart
                             List<ShoppingCart> shoppingCarts = _unitOfWork.ShoppingCart
                                 .GetAll(x => x.ApplicationUserId == orderHeaderFromDB.ApplicationUserId).ToList();
@@ -254,7 +301,7 @@ namespace BookManagementWeb.Areas.Customer.Controllers
             catch
             {
                 transaction.Rollback();
-                return View(orderHeaderFromDB);
+                return View(null);
             }
         }
 

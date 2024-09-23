@@ -8,7 +8,7 @@
         <div class="card-header bg-primary bg-gradient py-3">
             <div class="row">
                 <div class="col-12 text-center text-white">
-                    <h2>Danh sách loại phòng</h2>
+                    <h2>List Order</h2>
                 </div>
             </div>
         </div>
@@ -24,40 +24,46 @@
                 <table id="myTable" class="table table-bordered table-striped w-100">
                     <thead>
                         <tr>
+                            <th></th>
                             <th>Id</th>
-                            <th>Order Date</th>
-                            <th>Name</th>
-                            <th>Phone Number</th>
-                            <th>Email</th>
                             <th>Order Status</th>
                             <th>Payment Status</th>
                             <th>Total</th>
+                            <th>Name</th>
+                            <th>Phone Number</th>
+                            <th>Email</th>
+                            <th>Order Date</th>
                             <th></th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (OrderHeader item in Model)
-                        {
-                            <tr>
-                                <td>@item.Id</td>
-                                <td>@item.OrderDate?.ToString("dd-MMM-yyyy")</td>
-                                <td>@item.Name</td>
-                                <td>@item.PhoneNumber</td>
-                                <td>@item.ApplicationUser.Email</td>
-                                <td>@item.OrderStatus</td>
-                                <td>@item.PaymentStatus</td>
-                                <td>@item.OrderTotal.ToString("c")</td>
-                                <td class="text-center">
-                                    <div class="w-100 btn-group" role="group">
-                                        <a asp-controller="Order" asp-action="Details" asp-route-orderId="@item.Id" class="btn btn-primary mx-2">
-                                            <i class="bi bi-pencil-square"> Detail</i>
-                                        </a>
-                                        @* <a onclick="DeleteConfirm('/admin/product/delete/@item.ProductId', this)" class="btn btn-outline-danger mx-2">
-                                            <i class="bi bi-trash"> Delete</i>
-                                        </a> *@
-                                    </div>
-                                </td>
-                            </tr>
+                        @{
+                            int i = 1;
+                            @foreach (OrderHeader item in Model)
+                            {
+                                <tr>
+                                    <td>@i</td>
+                                    <td>@item.Id</td>
+                                    <td>@item.OrderStatus</td>
+                                    <td>@item.PaymentStatus</td>
+                                    <td>@item.OrderTotal.ToString("c")</td>
+                                    <td>@item.Name</td>
+                                    <td>@item.PhoneNumber</td>
+                                    <td>@item.ApplicationUser.Email</td>
+                                    <td>@item.OrderDate?.ToString("dd-MMM-yyyy")</td>
+                                    <td class="text-center">
+                                        <div class="w-100 btn-group" role="group">
+                                            <a asp-controller="Order" asp-action="Details" asp-route-orderId="@item.Id" class="btn btn-primary mx-2">
+                                                <i class="bi bi-pencil-square"> Detail</i>
+                                            </a>
+                                            @* <a onclick="DeleteConfirm('/admin/product/delete/@item.ProductId', this)" class="btn btn-outline-danger mx-2">
+                                    <i class="bi bi-trash"> Delete</i>
+                                    </a> *@
+                                        </div>
+                                    </td>
+                                </tr>
+                                i++;
+                            }
                         }
                     </tbody>
                 </table>
@@ -90,7 +96,24 @@
                     url: 'order/statusorder/' + status,
                 },
                 columns: [
+                    {
+                        data: null, // This is for the index column
+                        "render": function (data, type, row, meta) {
+                            return meta.row + 1; // Displaying row index starting from 1
+                        }
+                    },
                     { data: 'id' },
+                    { data: 'orderStatus' },
+                    { data: 'paymentStatus' },
+                    {
+                        data: 'orderTotal',
+                        "render": function (data) {
+                            return formatter.format(data); // Assuming formatter is defined elsewhere
+                        }
+                    },
+                    { data: 'name' },
+                    { data: 'phoneNumber' },
+                    { data: 'applicationUser.email' },
                     {
                         data: 'orderDate',
                         "render": function (data) {
@@ -98,35 +121,23 @@
                             let year = new Intl.DateTimeFormat('en', { year: 'numeric' }).format(date);
                             let month = new Intl.DateTimeFormat('en', { month: 'short' }).format(date);
                             let day = new Intl.DateTimeFormat('en', { day: '2-digit' }).format(date);
-                            return `${day}-${month}-${year}`
-                        }
-                    },
-                    { data: 'name' },
-                    { data: 'phoneNumber' },
-                    { data: 'applicationUser.email' },
-                    { data: 'orderStatus' },
-                    { data: 'paymentStatus' },
-                    {
-                        data: 'orderTotal',
-                        "render": function (data) {
-                            return `${formatter.format(data)}`
+                            return `${day}-${month}-${year}`;
                         }
                     },
                     {
                         data: 'id',
                         "render": function (data) {
-                            return ` <div class="w-100 btn-group" role="group">
-                                                <a href="/Admin/Order/Details?orderId=${data}" class="btn btn-primary mx-2">
-                                                    <i class="bi bi-pencil-square"> Detail</i>
-                                                </a>
-        @* <a onclick="DeleteConfirm('/admin/product/delete/@item.ProductId', this)" class="btn btn-outline-danger mx-2">
-                                                <i class="bi bi-trash"> Delete</i>
-                                            </a> *@
-                                            </div>`
+                            return `
+                            <div class="w-100 btn-group" role="group">
+                                <a href="/Admin/Order/Details?orderId=${data}" class="btn btn-primary mx-2">
+                                    <i class="bi bi-pencil-square"> Detail</i>
+                                </a>
+                            </div>`;
                         }
                     }
                 ]
             });
+
         }
     </script>
 }

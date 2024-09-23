@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace BookManager.DataAccess.Repository
 {
-    public class PaymentTypeRepository : Repository<PaymentType>, IPaymentType
+    public class PaymentTypeRepository : Repository<PaymentType>, IPaymentTypeRepository
     {
         private ApplicationDbContext _db;
         public PaymentTypeRepository(ApplicationDbContext db) : base(db)

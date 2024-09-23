@@ -1,5 +1,6 @@
 ﻿using BookManager.DataAccess.Repository.IRepository;
 using BookManager.Models;
+using BookManager.Models.PaymentGate;
 using BookManager.Models.ViewModel;
 using BookManager.Utility;
 using Microsoft.AspNetCore.Authorization;
@@ -25,13 +26,13 @@ namespace BookManagementWeb.Areas.Customer.Controllers
         public IActionResult Index()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            return View(_unitOfWork.OrderHeader.GetAll(x => x.ApplicationUserId == userId, includeProperties: "ApplicationUser"));
+            return View(_unitOfWork.OrderHeader.GetAll(x => x.ApplicationUserId == userId, includeProperties: "ApplicationUser", orderByDescending: x => x.Id));
         }
         public IActionResult Details(int orderId)
         {
             OrderVM = new()
             {
-                OrderHeader = _unitOfWork.OrderHeader.Get(x => x.Id == orderId, includeProperties: "ApplicationUser"),
+                OrderHeader = _unitOfWork.OrderHeader.Get(x => x.Id == orderId, includeProperties: "ApplicationUser,PaymentTransaction"),
                 OrderDetails = _unitOfWork.OrderDetail.GetAll(x => x.OrderHeaderId == orderId, includeProperties: "Product").ToList()
             };
             return View(OrderVM);
@@ -70,7 +71,11 @@ namespace BookManagementWeb.Areas.Customer.Controllers
 
             var service = new Stripe.Checkout.SessionService();
             Session session = service.Create(options);
-            _unitOfWork.OrderHeader.UpdateStripePaymentID(OrderVM.OrderHeader.Id, session.Id, session.PaymentIntentId); // PaymentIntentId = null vì chua hoan tat thanh toan
+            //_unitOfWork.OrderHeader.UpdateStripePaymentID(OrderVM.OrderHeader.Id, session.Id, session.PaymentIntentId); // PaymentIntentId = null vì chua hoan tat thanh toan
+            OrderHeader orderHeaderFromDB = _unitOfWork.OrderHeader.Get(x => x.Id == orederDetailFromDB.FirstOrDefault()!.OrderHeaderId, includeProperties: "PaymentTransaction");
+            orderHeaderFromDB.PaymentTransaction.SessionId = session.Id;
+            orderHeaderFromDB.PaymentTransaction.PaymentIntentId = session.PaymentIntentId;
+            _unitOfWork.PaymentTransaction.Update(orderHeaderFromDB.PaymentTransaction);
             _unitOfWork.Save();
 
             // Chuyen den trang checkout
@@ -81,7 +86,7 @@ namespace BookManagementWeb.Areas.Customer.Controllers
         [HttpPost]
         public IActionResult UpdateOrderDetails()
         {
-            var orderHeaderFromDB = _unitOfWork.OrderHeader.Get(x => x.Id == OrderVM.OrderHeader.Id, includeProperties: "ApplicationUser");
+            var orderHeaderFromDB = _unitOfWork.OrderHeader.Get(x => x.Id == OrderVM.OrderHeader.Id, includeProperties: "ApplicationUser,PaymentTransaction");
             if (orderHeaderFromDB != null)
             {
                 orderHeaderFromDB.Name = OrderVM.OrderHeader.Name;
@@ -90,7 +95,7 @@ namespace BookManagementWeb.Areas.Customer.Controllers
                 orderHeaderFromDB.Ward = OrderVM.OrderHeader.Ward;
                 orderHeaderFromDB.District = OrderVM.OrderHeader.District;
                 orderHeaderFromDB.City = OrderVM.OrderHeader.City;
-                if (OrderVM.OrderHeader.SessionId == null)
+                if (OrderVM.OrderHeader.PaymentTransaction.SessionId == null)
                 {
                     orderHeaderFromDB.PaymentDueDate = OrderVM.OrderHeader.PaymentDueDate;
                 }
@@ -117,13 +122,14 @@ namespace BookManagementWeb.Areas.Customer.Controllers
         [HttpPost("admin/orderhistory/CancelOrRefundOrder/{orderHeaderId}")]
         public IActionResult CancelOrRefundOrder(int orderHeaderId)
         {
-            var orderHeaderFromDB = _unitOfWork.OrderHeader.Get(x => x.Id == orderHeaderId);
-            if (orderHeaderFromDB.PaymentStatus == StaticDetail.PaymentStatus_Approved && orderHeaderFromDB.PaymentIntentId != null)
+            var orderHeaderFromDB = _unitOfWork.OrderHeader.Get(x => x.Id == orderHeaderId, includeProperties: "ApplicationUser,PaymentTransaction");
+
+            if (orderHeaderFromDB.PaymentStatus == StaticDetail.PaymentStatus_Approved && orderHeaderFromDB.PaymentTransaction.PaymentIntentId != null)
             {
                 var options = new RefundCreateOptions
                 {
                     Reason = RefundReasons.RequestedByCustomer,
-                    PaymentIntent = orderHeaderFromDB.PaymentIntentId,
+                    PaymentIntent = orderHeaderFromDB.PaymentTransaction.PaymentIntentId,
                 };
 
                 var services = new RefundService();

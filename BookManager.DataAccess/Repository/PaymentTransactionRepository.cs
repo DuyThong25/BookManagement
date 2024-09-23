@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace BookManager.DataAccess.Repository
 {
-    public class PaymentTransactionRepository : Repository<PaymentTransaction>, IPaymentTransaction
+    public class PaymentTransactionRepository : Repository<PaymentTransaction>, IPaymentTransactionRepository
     {
         private ApplicationDbContext _db;
         public PaymentTransactionRepository(ApplicationDbContext db) : base(db)

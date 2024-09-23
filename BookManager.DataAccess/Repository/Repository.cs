@@ -39,12 +39,16 @@ namespace BookManager.DataAccess.Repository
             return query.FirstOrDefault();
         }
 
-        public IEnumerable<T> GetAll(Expression<Func<T, bool>>? fillter, string? includeProperties = null)
+        public IEnumerable<T> GetAll(Expression<Func<T, bool>>? fillter, string? includeProperties = null,  Expression<Func<T, object>> orderByDescending = null)
         {
             IQueryable<T> query = dbSet;
             if (fillter != null)
             {
                 query = query.Where(fillter);
+            }
+            if (orderByDescending != null)
+            {
+                query = query.OrderByDescending(orderByDescending);
             }
 
             if (!String.IsNullOrEmpty(includeProperties))

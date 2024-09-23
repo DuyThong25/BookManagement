@@ -13,34 +13,107 @@ namespace BookManager.DataAccess.Repository
     public class UnitOfWork : IUnitOfWork
     {
         private readonly ApplicationDbContext _db;
-        public ICategoryRepository Category { get; private set; }
-        public IProductRepository Product { get; private set; }
-        public ICompanyRepository Company { get; private set; }
-        public IShoppingCartRepository ShoppingCart { get; private set; }
-        public IApplicationUser ApplicationUser { get; private set; }
-		public IOrderHeaderRepository OrderHeader { get; private set; }
-		public IOrderDetailRepository OrderDetail { get; private set; }
-		public IProductImageRepository ProductImage { get; private set; }
-		public IPaymentType PaymentType { get; private set; }
-		public IPaymentTransaction PaymentTransaction { get; private set; }
 
-		public UnitOfWork(ApplicationDbContext db)
+        private ICategoryRepository _category;
+        private IProductRepository _product;
+        private ICompanyRepository _company;
+        private IShoppingCartRepository _shoppingCart;
+        private IApplicationUser _applicationUser;
+        private IOrderHeaderRepository _orderHeader;
+        private IOrderDetailRepository _orderDetail;
+        private IProductImageRepository _productImage;
+        private IPaymentTypeRepository _paymentType;
+        private IPaymentTransactionRepository _paymentTransaction;
+
+        public UnitOfWork(ApplicationDbContext db)
         {
             _db = db;
-            Category = new CategoryRepository(_db);
-            Product = new ProductRepository(_db);
-            Company = new CompanyRepository(_db);
-            ShoppingCart = new ShoppingCartRepository(_db);
-            ApplicationUser = new ApplicationUserRepository(_db);
-			OrderHeader = new OrderHeaderRepository(_db);
-			OrderDetail = new OrderDetailRepository(_db);
-            ProductImage = new ProductImageRepository(_db);
-            PaymentType = new PaymentTypeRepository(_db);
-            PaymentTransaction = new PaymentTransactionRepository(_db);
         }
-		public void Save()
+
+        public ICategoryRepository Category
+        {
+            get
+            {
+                return _category ??= new CategoryRepository(_db);
+            }
+        }
+
+        public IProductRepository Product
+        {
+            get
+            {
+                return _product ??= new ProductRepository(_db);
+            }
+        }
+
+        public ICompanyRepository Company
+        {
+            get
+            {
+                return _company ??= new CompanyRepository(_db);
+            }
+        }
+
+        public IShoppingCartRepository ShoppingCart
+        {
+            get
+            {
+                return _shoppingCart ??= new ShoppingCartRepository(_db);
+            }
+        }
+
+        public IApplicationUser ApplicationUser
+        {
+            get
+            {
+                return _applicationUser ??= new ApplicationUserRepository(_db);
+            }
+        }
+
+        public IOrderHeaderRepository OrderHeader
+        {
+            get
+            {
+                return _orderHeader ??= new OrderHeaderRepository(_db);
+            }
+        }
+
+        public IOrderDetailRepository OrderDetail
+        {
+            get
+            {
+                return _orderDetail ??= new OrderDetailRepository(_db);
+            }
+        }
+
+        public IProductImageRepository ProductImage
+        {
+            get
+            {
+                return _productImage ??= new ProductImageRepository(_db);
+            }
+        }
+
+        public IPaymentTypeRepository PaymentType
+        {
+            get
+            {
+                return _paymentType ??= new PaymentTypeRepository(_db);
+            }
+        }
+
+        public IPaymentTransactionRepository PaymentTransaction
+        {
+            get
+            {
+                return _paymentTransaction ??= new PaymentTransactionRepository(_db);
+            }
+        }
+
+        public void Save()
         {
             _db.SaveChanges();
         }
     }
+
 }

@@ -12,7 +12,8 @@ namespace BookManager.Models.PaymentGate
     {
         [Key]
         public int Id { get; set; }
-        public string? TransactionId { get; set; }
+        public string? PaymentIntentId { get; set; }
+        public string? SessionId { get; set; }
         public string? TransactionStatus { get; set; }  // e.g., 'Completed', 'Pending'
         public string? Currency { get; set; }  // e.g., 'USD'
 

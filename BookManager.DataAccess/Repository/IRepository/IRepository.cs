@@ -10,7 +10,7 @@ namespace BookManager.DataAccess.Repository.IRepository
     public interface IRepository<T> where T : class // Kiểu Genegic phải là class
     {
         // VD: T - Product
-        IEnumerable<T> GetAll(Expression<Func<T, bool>>? fillter = null, string? includeProperties = null);
+        IEnumerable<T> GetAll(Expression<Func<T, bool>>? fillter = null, string? includeProperties = null, Expression<Func<T, object>>? orderByDescending = null);
         T Get(Expression<Func<T, bool>> fillter, string? includeProperties = null);  // VD: listCate.where(x => x.id > 5 );
         void Add(T entity);
         void Remove(T entity);

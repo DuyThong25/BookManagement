@@ -127,9 +127,17 @@
                                     <span asp-validation-for="OrderHeader.City" class="text-danger"></span>
                                 </div>
                             </div>
+                            <div class="row">
+                                <div class="col-3 my-1">
+                                    <label>Payment method</label>
+                                </div>
+                                <div class="col-9">
+                                    <select asp-for="@Model.OrderHeader.PaymentTypeId" asp-items="@Model.PaymentTypeList" class="form-select"></select>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-12 col-lg-5 offset-lg-1">
-                            <h4 class="text-start">
+                            <h4 class="text-start mb-3">
                                 <span class="text-info fw-bold">Order Summary:</span>
                             </h4>
 
@@ -155,13 +163,13 @@
             </div>
             <div class="card-footer">
                 <div class="row">
-                    <div class="col-12 col-md-8 pt-2">
+                    <div class="col-12 col-md-7 pt-2">
                         <p style="color:maroon; font-size:14px;">
                             Estimate Arrival Date:
                             @DateTime.Now.AddDays(4).ToShortDateString()
                         </p>
                     </div>
-                    <div class="col-12 col-md-4">
+                    <div class="col-12 col-md-5">
                         <button type="submit" value="Place Order" class="btn btn-primary form-control">Place Order</button>
                     </div>
                 </div>

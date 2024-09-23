@@ -2,6 +2,7 @@
 using BookManager.DataAccess.Repository.IRepository;
 using BookManager.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,30 +27,31 @@ namespace BookManager.DataAccess.Repository
 
         public void UpdateStatus(int id, string orderStatus, string? paymentStatus = null)
         {
-            var orderFromDB = _db.OrderHeaders.FirstOrDefault(x => x.Id == id);
-            if (orderFromDB != null)
+            var orderHeaderFromDB = _db.OrderHeaders.FirstOrDefault(x => x.Id == id);
+            if (orderHeaderFromDB != null)
             {
-                orderFromDB.OrderStatus = orderStatus;
+                orderHeaderFromDB.OrderStatus = orderStatus;
                 if (!String.IsNullOrEmpty(paymentStatus))
                 {
-                    orderFromDB.PaymentStatus = paymentStatus;
+                    orderHeaderFromDB.PaymentStatus = paymentStatus;
                 }
             }
         }
 
         public void UpdateStripePaymentID(int id, string sessionId, string paymentIntendId)
         {
-            var orderFromDB = _db.OrderHeaders.FirstOrDefault(x => x.Id == id);
-            if (orderFromDB != null)
+            var orderHeaderFromDB = _db.OrderHeaders.Include(x => x.PaymentTransaction).FirstOrDefault(x => x.Id == id);
+            //_db.OrderHeaders.FirstOrDefault(x => x.Id == id, includeProperties: "ApplicationUser,PaymentTransaction"),
+            if (orderHeaderFromDB != null)
             {
                 if (!String.IsNullOrEmpty(sessionId))
                 {
-                    orderFromDB.SessionId = sessionId;
+                    orderHeaderFromDB.PaymentTransaction.SessionId = sessionId;
                 }
                 if (!String.IsNullOrEmpty(paymentIntendId)) // Khi thanh toan thanh cong roi moi tao ra paymentIntendId
                 {
-                    orderFromDB.PaymentIntentId = paymentIntendId;
-                    orderFromDB.PaymentDate = DateTime.Now;
+                    orderHeaderFromDB.PaymentTransaction.PaymentIntentId = paymentIntendId;
+                    orderHeaderFromDB.PaymentDate = DateTime.Now;
                 }
             }
         }

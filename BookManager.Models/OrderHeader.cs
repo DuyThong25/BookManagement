@@ -25,10 +25,12 @@ namespace BookManager.Models
 		public string? Carrier { get; set; }
 		public DateTime? PaymentDate { get; set; }
 		public DateOnly? PaymentDueDate { get; set; }
-        public string? SessionId { get; set; }
 		public string? PaymentStatus { get; set; }
-        public string? PaymentIntentId { get; set; }
+        //public string? SessionId { get; set; }
+        //public string? PaymentIntentId { get; set; }
 
+		[NotMapped]
+		public int PaymentTypeId { get; set; }
 		public int? PaymentTransactionId { get; set; }
 		[ForeignKey("PaymentTransactionId")]
 		public PaymentTransaction PaymentTransaction { get; set; }

@@ -25,6 +25,9 @@ namespace BookManager.Utility
         public static string PaymentStatus_Approved = "Approved";
         public static string PaymentStatus_ApprovedForDelayedPayment = "ApprovedForDelayedPayment";
 
+        public const string PaymentType_Name_MoMo = "MoMo";
+        public const string PaymentType_Name_Stripe = "Stripe";
+
         public static string SessionCart = "SessionShoppingCart";
 
         //VND format
