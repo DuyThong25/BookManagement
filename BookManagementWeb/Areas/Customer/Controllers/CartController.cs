@@ -1,10 +1,12 @@
-﻿using BookManager.DataAccess.Repository.IRepository;
+﻿using BookManager.DataAccess.Data;
+using BookManager.DataAccess.Repository.IRepository;
 using BookManager.Models;
 using BookManager.Models.ViewModel;
 using BookManager.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.IdentityModel.Tokens;
 using Stripe.Checkout;
 using System.Security.Claims;
@@ -16,17 +18,19 @@ namespace BookManagementWeb.Areas.Customer.Controllers
     public class CartController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ApplicationDbContext _db;
         private readonly IEmailSender _emailSender;
         private readonly IWebHostEnvironment _webHostEnvironment;
 
         [BindProperty]
         public ShoppingCartVM ShoppingCartVM { get; set; }
 
-        public CartController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment, IEmailSender emailSender)
+        public CartController(IUnitOfWork unitOfWork, ApplicationDbContext db, IWebHostEnvironment webHostEnvironment, IEmailSender emailSender)
         {
             _unitOfWork = unitOfWork;
             _webHostEnvironment = webHostEnvironment;
             _emailSender = emailSender;
+            _db = db;
         }
 
         public IActionResult Index()
@@ -37,7 +41,7 @@ namespace BookManagementWeb.Areas.Customer.Controllers
             if (TempData["orderHeaderID"] != null)
             {
                 var orderHeaderFromDB = _unitOfWork.OrderHeader.Get(x => x.Id == TempData["orderHeaderID"] as int?, includeProperties: "ApplicationUser");
-                if (orderHeaderFromDB.ApplicationUser.CompanyID.GetValueOrDefault() == 0)
+                if (orderHeaderFromDB != null && orderHeaderFromDB.ApplicationUser.CompanyID.GetValueOrDefault() == 0)
                 {
                     // normal customer
                     _unitOfWork.OrderHeader.Remove(orderHeaderFromDB);
@@ -66,7 +70,11 @@ namespace BookManagementWeb.Areas.Customer.Controllers
             var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
 
             ShoppingCartVM = new ShoppingCartVM();
-
+            ShoppingCartVM.PaymentTypeList = _unitOfWork.PaymentType.GetAll(x => x.IsActive == true).Select(x => new SelectListItem
+            {
+                Value = x.Id.ToString(),
+                Text = x.Name
+            });
             ShoppingCartVM.ShoppingCartList = _unitOfWork.ShoppingCart.GetAll(x => x.ApplicationUserId == userId, includeProperties: "Product");
             if (!ShoppingCartVM.ShoppingCartList.IsNullOrEmpty())
             {
@@ -112,126 +120,142 @@ namespace BookManagementWeb.Areas.Customer.Controllers
         [ActionName("Summary")]
         public IActionResult SummaryPOST()
         {
-            var claimsIdentity = User.Identity as ClaimsIdentity;
-            var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
-
-            ShoppingCartVM.ShoppingCartList = _unitOfWork.ShoppingCart.GetAll(x => x.ApplicationUserId == userId, includeProperties: "Product");
-            ApplicationUser applicationUser = _unitOfWork.ApplicationUser.Get(x => x.Id == userId);
-            foreach (var cart in ShoppingCartVM.ShoppingCartList)
+            try
             {
-                cart.Price = GetBasePrice(cart);
-                ShoppingCartVM.OrderHeader.OrderTotal += (cart.Price * cart.Count);
-            }
+                var claimsIdentity = User.Identity as ClaimsIdentity;
+                var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
 
-            ShoppingCartVM.OrderHeader.OrderDate = DateTime.Now;
-            ShoppingCartVM.OrderHeader.ApplicationUserId = userId;
-
-            if (applicationUser.CompanyID.GetValueOrDefault() == 0)
-            {
-                // GetValueOrDefault trả về giá trị 0 khi value trong db = null
-                // Normal Custommer
-                ShoppingCartVM.OrderHeader.OrderStatus = StaticDetail.OrderStatus_Pending;
-                ShoppingCartVM.OrderHeader.PaymentStatus = StaticDetail.PaymentStatus_Pending;
-            }
-            else
-            {
-                // Company Customer
-                ShoppingCartVM.OrderHeader.OrderStatus = StaticDetail.OrderStatus_Approved;
-                ShoppingCartVM.OrderHeader.PaymentStatus = StaticDetail.PaymentStatus_ApprovedForDelayedPayment;
-            }
-            _unitOfWork.OrderHeader.Add(ShoppingCartVM.OrderHeader);
-            _unitOfWork.Save();
-
-            // Save in table OrderDetail
-            foreach (var cart in ShoppingCartVM.ShoppingCartList)
-            {
-                OrderDetail orderDetail = new()
-                {
-                    OrderHeaderId = ShoppingCartVM.OrderHeader.Id,
-                    ProductId = cart.ProductId,
-                    Price = cart.Price,
-                    Count = cart.Count
-                };
-                _unitOfWork.OrderDetail.Add(orderDetail);
-                _unitOfWork.Save();
-            }
-
-            // qua trinh thanh toan cua normal customer
-            if (applicationUser.CompanyID.GetValueOrDefault() == 0)
-            {
-                var domain = Request.Scheme + "://" + Request.Host.Value + "/" /*"https://localhost:7121/"*/;
-                var options = new Stripe.Checkout.SessionCreateOptions
-                {
-                    SuccessUrl = domain + $"customer/cart/OrderConfirmation?id={ShoppingCartVM.OrderHeader.Id}",
-                    CancelUrl = domain + "customer/cart/index",
-                    LineItems = new List<Stripe.Checkout.SessionLineItemOptions>(),
-                    Mode = "payment",
-                };
-                TempData["orderHeaderID"] = ShoppingCartVM.OrderHeader.Id;
-                // configure san pham trong gio hang
+                ShoppingCartVM.ShoppingCartList = _unitOfWork.ShoppingCart.GetAll(x => x.ApplicationUserId == userId, includeProperties: "Product");
+                ApplicationUser applicationUser = _unitOfWork.ApplicationUser.Get(x => x.Id == userId);
                 foreach (var cart in ShoppingCartVM.ShoppingCartList)
                 {
-                    var sessionLineItem = new SessionLineItemOptions
-                    {
-                        PriceData = new SessionLineItemPriceDataOptions
-                        {
-                            UnitAmount = (long)(cart.Price * 100), // $20.5 => 2500
-                            Currency = "usd",
-                            ProductData = new SessionLineItemPriceDataProductDataOptions
-                            {
-                                Name = cart.Product.Title,
-                            }
-                        },
-                        Quantity = cart.Count
-                    };
-                    options.LineItems.Add(sessionLineItem);
+                    cart.Price = GetBasePrice(cart);
+                    ShoppingCartVM.OrderHeader.OrderTotal += (cart.Price * cart.Count);
                 }
 
-                var service = new Stripe.Checkout.SessionService();
-                Session session = service.Create(options);
-                _unitOfWork.OrderHeader.UpdateStripePaymentID(ShoppingCartVM.OrderHeader.Id, session.Id, session.PaymentIntentId); // PaymentIntentId = null vì chua hoan tat thanh toan
+                ShoppingCartVM.OrderHeader.OrderDate = DateTime.Now;
+                ShoppingCartVM.OrderHeader.ApplicationUserId = userId;
+
+                if (applicationUser.CompanyID.GetValueOrDefault() == 0)
+                {
+                    // GetValueOrDefault trả về giá trị 0 khi value trong db = null
+                    // Normal Custommer
+                    ShoppingCartVM.OrderHeader.OrderStatus = StaticDetail.OrderStatus_Pending;
+                    ShoppingCartVM.OrderHeader.PaymentStatus = StaticDetail.PaymentStatus_Pending;
+                }
+                else
+                {
+                    // Company Customer
+                    ShoppingCartVM.OrderHeader.OrderStatus = StaticDetail.OrderStatus_Approved;
+                    ShoppingCartVM.OrderHeader.PaymentStatus = StaticDetail.PaymentStatus_ApprovedForDelayedPayment;
+                }
+                _unitOfWork.OrderHeader.Add(ShoppingCartVM.OrderHeader);
                 _unitOfWork.Save();
 
-                // Chuyen den trang checkout
-                Response.Headers.Add("Location", session.Url);
-                return new StatusCodeResult(303);
+                // Save in table OrderDetail
+                foreach (var cart in ShoppingCartVM.ShoppingCartList)
+                {
+                    OrderDetail orderDetail = new()
+                    {
+                        OrderHeaderId = ShoppingCartVM.OrderHeader.Id,
+                        ProductId = cart.ProductId,
+                        Price = cart.Price,
+                        Count = cart.Count
+                    };
+                    _unitOfWork.OrderDetail.Add(orderDetail);
+                    _unitOfWork.Save();
+                }
+
+                // qua trinh thanh toan cua normal customer
+                if (applicationUser.CompanyID.GetValueOrDefault() == 0)
+                {
+                    var domain = Request.Scheme + "://" + Request.Host.Value + "/" /*"https://localhost:7121/"*/;
+                    var options = new Stripe.Checkout.SessionCreateOptions
+                    {
+                        SuccessUrl = domain + $"customer/cart/OrderConfirmation?id={ShoppingCartVM.OrderHeader.Id}",
+                        CancelUrl = domain + "customer/cart/index",
+                        LineItems = new List<Stripe.Checkout.SessionLineItemOptions>(),
+                        Mode = "payment",
+                    };
+                    TempData["orderHeaderID"] = ShoppingCartVM.OrderHeader.Id;
+                    // configure san pham trong gio hang
+                    foreach (var cart in ShoppingCartVM.ShoppingCartList)
+                    {
+                        var sessionLineItem = new SessionLineItemOptions
+                        {
+                            PriceData = new SessionLineItemPriceDataOptions
+                            {
+                                UnitAmount = (long)(cart.Price * 100), // $20.5 => 2500
+                                Currency = "usd",
+                                ProductData = new SessionLineItemPriceDataProductDataOptions
+                                {
+                                    Name = cart.Product.Title,
+                                }
+                            },
+                            Quantity = cart.Count
+                        };
+                        options.LineItems.Add(sessionLineItem);
+                    }
+
+                    var service = new Stripe.Checkout.SessionService();
+                    Session session = service.Create(options);
+                    _unitOfWork.OrderHeader.UpdateStripePaymentID(ShoppingCartVM.OrderHeader.Id, session.Id, session.PaymentIntentId); // PaymentIntentId = null vì chua hoan tat thanh toan
+                    _unitOfWork.Save();
+                    // Chuyen den trang checkout
+                    Response.Headers.Add("Location", session.Url);
+                    return new StatusCodeResult(303);
+                }
+                return RedirectToAction(nameof(OrderConfirmation), new { id = ShoppingCartVM.OrderHeader.Id });
             }
-            return RedirectToAction(nameof(OrderConfirmation), new { id = ShoppingCartVM.OrderHeader.Id });
+            catch
+            {
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         public IActionResult OrderConfirmation(int id)
         {
+            using var transaction = _db.Database.BeginTransaction();
             // Cap nhat OrderStatus va PaymentIntendID
             var orderHeaderFromDB = _unitOfWork.OrderHeader.Get(u => u.Id == id, includeProperties: "ApplicationUser");
-            if (orderHeaderFromDB != null)
+            try
             {
-                if (!String.IsNullOrEmpty(orderHeaderFromDB.SessionId))
+                if (orderHeaderFromDB != null)
                 {
-                    var service = new SessionService();
-                    Session session = service.Get(orderHeaderFromDB.SessionId);
-                    if (session.PaymentStatus.ToLower() == "paid")
+                    if (!String.IsNullOrEmpty(orderHeaderFromDB.SessionId))
                     {
-                        _unitOfWork.OrderHeader.UpdateStripePaymentID(id, session.Id, session.PaymentIntentId);
-                        _unitOfWork.OrderHeader.UpdateStatus(id, StaticDetail.OrderStatus_Approved, StaticDetail.PaymentStatus_Approved);
-                        _unitOfWork.Save();
+                        var service = new SessionService();
+                        Session session = service.Get(orderHeaderFromDB.SessionId);
+                        if (session.PaymentStatus.ToLower() == "paid")
+                        {
+                            _unitOfWork.OrderHeader.UpdateStripePaymentID(id, session.Id, session.PaymentIntentId);
+                            _unitOfWork.OrderHeader.UpdateStatus(id, StaticDetail.OrderStatus_Approved, StaticDetail.PaymentStatus_Approved);
+                            _unitOfWork.Save();
 
+                            //Send Mail After Payment APPROVED
+                            string teamplate = TemplateEmailConfirmOrder(orderHeaderFromDB);
+                            _emailSender.SendEmailAsync(orderHeaderFromDB.ApplicationUser.Email
+                                , $"Thank you for your order - Your Order is {orderHeaderFromDB.Id}"
+                                , teamplate);
+                            //Clear cart
+                            List<ShoppingCart> shoppingCarts = _unitOfWork.ShoppingCart
+                                .GetAll(x => x.ApplicationUserId == orderHeaderFromDB.ApplicationUserId).ToList();
+                            _unitOfWork.ShoppingCart.RemoveRange(shoppingCarts);
+                            _unitOfWork.Save();
+                            //Clear session
+                            HttpContext.Session.Remove(StaticDetail.SessionCart);
+                            transaction.Commit();
+                        }
                     }
                 }
-                //Send Mail After Payment APPROVED
-                string teamplate = TemplateEmailConfirmOrder(orderHeaderFromDB);
-                _emailSender.SendEmailAsync(orderHeaderFromDB.ApplicationUser.Email
-                    , $"Thank you for your order - Your Order is {orderHeaderFromDB.Id}"
-                    , teamplate);
-            }
 
-            //Clear cart
-            List<ShoppingCart> shoppingCarts = _unitOfWork.ShoppingCart
-                .GetAll(x => x.ApplicationUserId == orderHeaderFromDB.ApplicationUserId).ToList();
-            _unitOfWork.ShoppingCart.RemoveRange(shoppingCarts);
-            _unitOfWork.Save();
-            //Clear session
-            HttpContext.Session.Remove(StaticDetail.SessionCart);
-            return View(orderHeaderFromDB);
+                return View(orderHeaderFromDB);
+            }
+            catch
+            {
+                transaction.Rollback();
+                return View(orderHeaderFromDB);
+            }
         }
 
         private string TemplateEmailConfirmOrder(OrderHeader orderHeader)
